@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserInfoDao">
+
+	<!-- 用户简介 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.UserBriefInfo" id="userBriefResultMap">  
+	    <id property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="nickname" column="NICKNAME" />  
+	    <result property="photo" column="PHOTO" />  
+	    <result property="level_id" column="LEVEL_ID" />  
+	</resultMap>  
+
+	<!-- 用户详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.UserInfo" id="userInfoResultMap">  
+	    <id property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="proto_tag" column="PROTO_TAG" />  
+	    <result property="nickname" column="NICKNAME" />  
+	    <result property="birth" column="BIRTH" />  
+	    <result property="area" column="AREA" />  
+	    <result property="sex" column="SEX" />  
+	    <result property="photo" column="PHOTO" />  
+	    <result property="signature" column="SIGNATURE" />  
+	    <result property="level_id" column="LEVEL_ID" />  
+	    <result property="mobile" column="MOBILE" />
+	    <result property="passwd" column="PASSWD" />   
+	</resultMap>  
+	
+
+	<!-- 用户所有信息 -->
+ 	<resultMap type="com.xinlianfeng.yibaker.common.resp.UserDetailResp" id="userDetailResultMap">
+		<association property="user" resultMap="userInfoResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSUserDao.userSNSCountResultMap"/>
+	</resultMap>
+
+	<!-- 好友信息 -->
+	<!-- 
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.FollowDetailResp" id="followDetailResultMap" >
+		<association property="user" resultMap="userInfoResultMap"/>
+	    <result property="follow_time" column="FOLLOW_TIME" />  
+		<association property="liketime" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSUserDao.snsUserResultMap"/>
+		<association property="mysns"  column="yb_user_id" select="com.xinlianfeng.yibaker.provider.dao.SNSUserDao.getSNS"/>
+	</resultMap>
+	-->
+
+	<!-- 好友列表 -->
+	<!-- 
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.FollowListResp" id="followListMap" >
+		<collection  property="followlist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.FollowDetailResp" resultMap="followDetailResultMap"/>
+	</resultMap>
+	-->
+
+ 	<!-- 查询用户详情 -->
+    <select id="findOne" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserInfo">
+       <include refid="selectUserRegInfoSql"></include>
+		<where>
+			YB_USER_ID=#{yb_user_id}
+		</where>
+    </select>
+
+ 	<!-- 查询用户简介 -->
+     <select id="getUserBriefInfo" resultMap ="userBriefResultMap">
+    	SELECT 
+		    YB_USER_ID,
+		    NICKNAME,
+		    PHOTO,
+		    LEVEL_ID 
+		FROM
+		    YB_T_USER_INFO
+		WHERE YB_USER_ID = #{yb_user_id}
+    </select>
+
+	<!-- 创建用户信息 -->
+	<insert id="createUserDetail" parameterType="com.xinlianfeng.yibaker.common.entity.UserInfo">
+		insert into
+		YB_T_USER_INFO (YB_USER_ID, PROTO_TAG, NICKNAME, BIRTH, AREA, SEX,
+		PHOTO, SIGNATURE, LEVEL_ID)
+		values (#{yb_user_id}, #{proto_tag},
+		#{nickname}, #{birth}, #{area}, #{sex}, #{photo}, #{signature},
+		#{level_id})
+	</insert>
+
+	<!-- 更新用户信息 -->
+    <update id="updateUserInfo" parameterType="com.xinlianfeng.yibaker.common.entity.UserInfo">
+        update YB_T_USER_INFO 
+        	<set>
+        		<if test="null != nickname and '' != nickname ">
+        			NICKNAME = #{nickname},
+        		</if>
+        		<if test="null != birth and '' != birth ">
+        			BIRTH = #{birth},
+        		</if>
+        		<if test="null != area and '' != area ">
+        			AREA = #{area},
+        		</if>
+        		<if test="null != sex">
+        			SEX = #{sex},
+        		</if>
+        		<if test="null != photo and '' != photo ">
+        			PHOTO = #{photo},
+        		</if>
+        		<if test="null != signature and '' != signature ">
+        			SIGNATURE = #{signature},
+        		</if>
+        	</set>
+        	where YB_USER_ID = #{yb_user_id}
+    </update>
+    
+	<!-- 更新用户信息 -->
+    <update id="updateUserLevel" parameterType="com.xinlianfeng.yibaker.common.entity.UserInfo">
+        update YB_T_USER_INFO set LEVEL_ID = #{level_id} where YB_USER_ID = #{yb_user_id}
+    </update>
+
+ 	<!-- 查询我的 -->
+      <select id="getMyInfo" resultMap ="userDetailResultMap">
+    	<include refid="selectMyInfoSql"></include>
+    	<where> u.YB_USER_ID = #{yb_user_id}</where>
+    </select>
+ 
+ 	<!-- 查询她的 -->
+      <select id="getOtherInfo" resultMap ="userDetailResultMap">
+    	<include refid="selectOtherInfoSql"></include>
+    	<where> u.YB_USER_ID = #{yb_user_id}</where>
+    </select>
+ 
+	<!-- 查询好友列表 -->
+    <select id="getFriendList" resultType="com.xinlianfeng.yibaker.common.resp.FollowDetailResp">
+        <include refid="selectFriendListSql"></include>
+		<where>
+			<choose>
+				<when test="0 == friend_type">  
+					us.FROM_USER_ID=#{user_id}
+				</when >
+	            <otherwise>  
+					us.TO_USER_ID=#{user_id}
+	            </otherwise>  
+			</choose>
+			and us.IS_FOLLOW = 1 
+			<if test="0 != follow_time">
+				<![CDATA[
+					and us.FOLLOW_TIME < #{follow_time}
+				]]> 
+			</if>
+		</where>
+		 order by us.FOLLOW_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询好友总数 -->
+    <select id="getFriendTotal" resultType="int">
+   	 	select count(*) from YB_T_SNS_USER
+		<where>
+			<choose>
+				<when test="0 == friend_type">  
+					FROM_USER_ID=#{user_id}
+				</when >
+	            <otherwise>  
+					TO_USER_ID=#{user_id}
+	            </otherwise>  
+			</choose>
+			and IS_FOLLOW = 1 
+		</where>
+    </select>
+
+    <!-- 检查昵称是否存在  -->
+   <select id="checkNickName" resultType="int">
+        select count(*) from YB_T_USER_INFO where NICKNAME = #{nickname}
+   </select>
+
+	<!-- 查询用户信息sql -->
+   <sql id="selectUserRegInfoSql">
+    	SELECT 
+		    YB_USER_ID,
+		    PROTO_TAG,
+		    NICKNAME,
+		    BIRTH,
+		    AREA,
+		    SEX,
+		    PHOTO,
+		    SIGNATURE,
+		    LEVEL_ID 
+		FROM
+		    YB_T_USER_INFO
+    </sql>
+
+	<!-- 查询我的sql -->
+    <sql id="selectMyInfoSql">
+    	SELECT  
+		    u.YB_USER_ID,
+		    u.PROTO_TAG,
+		    u.NICKNAME,
+		    u.BIRTH,
+		    u.AREA,
+		    u.SEX,
+		    u.PHOTO,
+		    u.SIGNATURE,
+		    u.LEVEL_ID,
+		    ur.MOBILE,
+		    ur.PASSWD,
+		    ufs.FANS_COUNT,
+		    ufl.FOLLOWING_COUNT,
+		    r.RECIPE_COUNT,
+		    w.WORK_COUNT,
+		    (ifnull(rop.RECIPE_COLLECT_CNT, 0) + ifnull(top.TOPIC_COLLECT_CNT, 0)) COLLECT_COUNT,
+		    rop.DOWNLOAD_COUNT
+		    <!-- 
+		    us.COIN_COUNT,
+		    us.MISSION_COUNT,
+		    us.ORDER_COUNT,
+		     -->
+		FROM
+		    YB_T_USER_INFO u
+		        LEFT JOIN
+			(select TO_USER_ID, ifnull(count(*), 0) FANS_COUNT from YB_T_SNS_USER where IS_FOLLOW = 1 group by TO_USER_ID) ufs on u.YB_USER_ID = ufs.TO_USER_ID
+				LEFT JOIN
+			(select FROM_USER_ID, ifnull(count(*), 0) FOLLOWING_COUNT from YB_T_SNS_USER where IS_FOLLOW = 1 group by FROM_USER_ID) ufl on u.YB_USER_ID = ufl.FROM_USER_ID
+				LEFT JOIN
+			<![CDATA[
+		    	(select YB_USER_ID, ifnull(count(*), 0) RECIPE_COUNT from YB_T_RECIPE where DR = 0 and RECIPE_STATUS < 2 group by YB_USER_ID)  r on u.YB_USER_ID = r.YB_USER_ID   
+			]]> 
+				LEFT JOIN
+		    (select YB_USER_ID, ifnull(count(*), 0) WORK_COUNT from YB_T_RECIPE_WORK 
+		    		where DR = 0 and RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0 and RECIPE_STATUS=1)
+		    		group by YB_USER_ID)  w on u.YB_USER_ID = w.YB_USER_ID   
+		        LEFT JOIN
+			(select YB_USER_ID, sum(IS_COLLECT) RECIPE_COLLECT_CNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE 
+			 		where RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0 and RECIPE_STATUS=1)
+			 		group by YB_USER_ID) rop on u.YB_USER_ID = rop.YB_USER_ID
+		        LEFT JOIN
+			(select YB_USER_ID, sum(IS_COLLECT) TOPIC_COLLECT_CNT from YB_T_SNS_TOPIC group by YB_USER_ID) top on u.YB_USER_ID = top.YB_USER_ID
+			    LEFT JOIN 
+			       YB_T_USER_REGINFO ur on ur.YB_USER_ID = u.YB_USER_ID
+			 
+    </sql>
+
+	<!-- 查询她的 -->
+	<!-- 不能查询未通过审核的菜谱以及金币、收藏、下载等信息 -->
+    <sql id="selectOtherInfoSql">
+    	SELECT  
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.BIRTH,
+		    u.AREA,
+		    u.SEX,
+		    u.PHOTO,
+		    u.SIGNATURE,
+		    u.LEVEL_ID,
+		    ufs.FANS_COUNT,
+		    ufl.FOLLOWING_COUNT,
+		    r.RECIPE_COUNT,
+		    w.WORK_COUNT
+		FROM
+		    YB_T_USER_INFO u
+		        LEFT JOIN
+			(select TO_USER_ID, ifnull(count(*), 0) FANS_COUNT from YB_T_SNS_USER where IS_FOLLOW = 1 group by TO_USER_ID) ufs on u.YB_USER_ID = ufs.TO_USER_ID
+				LEFT JOIN
+			(select FROM_USER_ID, ifnull(count(*), 0) FOLLOWING_COUNT from YB_T_SNS_USER where IS_FOLLOW = 1 group by FROM_USER_ID) ufl on u.YB_USER_ID = ufl.FROM_USER_ID
+				LEFT JOIN
+		    (select YB_USER_ID, ifnull(count(*), 0) RECIPE_COUNT from YB_T_RECIPE where DR = 0 and RECIPE_STATUS=1 group by YB_USER_ID)  r on u.YB_USER_ID = r.YB_USER_ID   
+				LEFT JOIN
+		    (select YB_USER_ID, ifnull(count(*), 0) WORK_COUNT from YB_T_RECIPE_WORK 
+		    	where DR = 0 and RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0 and RECIPE_STATUS=1)
+		    	group by YB_USER_ID)  w on u.YB_USER_ID = w.YB_USER_ID   
+    </sql>
+
+	<!-- 查询我的好友列表sql -->
+    <sql id="selectFriendListSql">
+     	SELECT  
+		    ui.YB_USER_ID,
+		   	ui.NICKNAME,
+		    ui.BIRTH,
+		    ui.AREA,
+		    ui.SEX,
+		    ui.PHOTO,
+		    ui.SIGNATURE,
+		    ui.LEVEL_ID,
+		    us.FOLLOW_TIME
+		FROM
+		    YB_T_SNS_USER us
+			<choose>
+				<when test="0 == friend_type">  
+					LEFT JOIN
+						YB_T_USER_INFO ui on us.TO_USER_ID = ui.YB_USER_ID
+				</when >
+	            <otherwise>  
+					LEFT JOIN
+						YB_T_USER_INFO ui on us.FROM_USER_ID = ui.YB_USER_ID
+	            </otherwise>  
+			</choose>
+			
+    </sql>
+    <select id="findUserLevelInfo" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserLevelInfo">
+    	select ui.YB_USER_ID, ui.NICKNAME,ui.LEVEL_ID, ul.NEXT_LEVEL_ID, ul2.LEVEL_COINS as NEXT_LEVEL_COINS, ba.ACCUM_INCOME  
+    		from YB_T_USER_INFO ui 
+    		left join YB_T_USER_LEVEL ul on ui.LEVEL_ID = ul.LEVEL_ID 
+    		left join YB_T_USER_LEVEL ul2 on ul.NEXT_LEVEL_ID = ul2.LEVEL_ID 
+    		left join YB_T_BAKER_ACCOUNT ba on ui.YB_USER_ID = ba.YB_USER_ID 
+    		where ui.YB_USER_ID = #{yb_user_id}
+    </select>
+    <select id="findUserInfoByHxUserAcccount" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserInfo">
+    	select ui.YB_USER_ID, ui.NICKNAME, ui.PHOTO from YB_T_USER_INFO ui inner join YB_T_USER_EASEMOB ue on ui.YB_USER_ID = ue.YB_USER_ID where ue.USERNAME = #{hx_user_account}
+    </select>
+
+</mapper>

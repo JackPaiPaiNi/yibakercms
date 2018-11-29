@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeTipDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeTip" id="recipeTipResultMap">  
+	    <result property="tip_id" column="TIP_ID" />  
+	    <result property="recipe_id" column="RECIPE_ID" />  
+	    <result property="tip_content" column="TIP_CONTENT" />  
+	</resultMap>  
+
+	<insert id="createRecipeTip" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeTip"  useGeneratedKeys="true" keyProperty="tip_id">
+		insert into
+		YB_T_RECIPE_TIPS (
+		RECIPE_ID, 
+		TIP_CONTENT)
+		values (
+		#{recipe_id}, 
+		#{tip_content})
+	</insert>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSMsgInfoDao">
+
+	<!-- 创建站内通知信息 -->
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.SNSMsgInfo"  useGeneratedKeys="true" keyProperty="msg_info_id">
+		insert into
+		YB_T_SNS_MSG_INFO (
+		MSG_TYPE, 
+		SEND_TYPE, 
+		MSG_TITLE, 
+		MSG_CONTENT, 
+		SRC_ID, 
+		SRC_IMAGE, 
+		FROM_USER_ID, 
+		FROM_USER_NAME, 
+		FROM_USER_PHOTO, 
+		SEND_TIME)
+		values (
+		#{msg_type}, 
+		#{send_type},
+		#{msg_title}, 
+		#{msg_content}, 
+		#{src_id}, 
+		#{src_image}, 
+		#{from_user_id}, 
+		#{from_user_name}, 
+		#{from_user_photo}, 
+		#{send_time})
+	</insert>
+
+	<!-- 查询站内通知列表 -->
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.SNSMsgInfo">
+   	 	SELECT 
+   	 		mi.MSG_INFO_ID,
+   	 		mi.MSG_TYPE,
+   	 		mi.SEND_TYPE,
+   	 		mi.MSG_TITLE,
+   	 		mi.MSG_CONTENT,
+   	 		mi.SRC_ID,
+   	 		mi.SRC_IMAGE,
+   	 		mi.FROM_USER_ID,
+   	 		mi.FROM_USER_NAME,
+   	 		mi.FROM_USER_PHOTO,
+   	 		mi.SEND_TIME
+   	 	FROM 
+   	 		YB_T_SNS_MSG_INFO  mi
+ 				RIGHT JOIN
+			(SELECT MSG_INFO_ID FROM YB_T_SNS_MSG WHERE TO_USER_ID = #{to_user_id} AND GROUP_ID = #{group_id} AND DR = 0) m on mi.MSG_INFO_ID = m.MSG_INFO_ID
+		<if test="0 != msg_info_id">
+   	 		WHERE 
+				<![CDATA[
+	   	 			mi.MSG_INFO_ID < #{msg_info_id}
+				]]> 
+		</if>
+		 ORDER BY mi.MSG_INFO_ID DESC LIMIT #{limit}
+    </select>
+
+	<!-- 查询站内通知总数 -->
+    <select id="getTotal" resultType="int">
+   	 	select ifnull(count(*), 0) from YB_T_SNS_MSG where TO_USER_ID = #{to_user_id} and GROUP_ID = #{group_id} and DR = 0
+    </select>
+
+	<!-- 查询新的广播消息 -->
+    <select id="getNewBroadcastMsgList" resultType="com.xinlianfeng.yibaker.common.entity.SNSMsgInfo">
+   	 	SELECT 
+   	 		mi.MSG_INFO_ID
+   	 	FROM 
+   	 		YB_T_SNS_MSG_INFO  mi
+ 				LEFT JOIN
+			(SELECT MSG_INFO_ID FROM YB_T_SNS_MSG WHERE TO_USER_ID = #{to_user_id} ) m on mi.MSG_INFO_ID = m.MSG_INFO_ID
+   	 	WHERE 
+   	 		mi.SEND_TYPE = 2 and m.MSG_INFO_ID IS NULL
+		ORDER BY mi.MSG_INFO_ID DESC LIMIT #{limit}
+    </select>
+
+
+</mapper>

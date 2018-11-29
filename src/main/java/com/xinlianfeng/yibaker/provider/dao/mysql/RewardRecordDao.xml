@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RewardRecordDao">
+
+   <insert id="createRewardRecord" parameterType="com.xinlianfeng.yibaker.common.entity.RewardRecord" useGeneratedKeys="true" keyProperty="reward_no">
+   	insert into YB_T_REWARD_RECORD (REWARD_ORDERNO, REWARDER_USER_ID, REWARDER_USER_NAME, REWARDEE_USER_ID, REWARDEE_USER_NAME, REWARD_BAKERS, REWARD_MSG, REWARD_TIME, NOTE )
+   	  values (#{reward_orderno}, #{rewarder_user_id}, #{rewarder_user_name}, #{rewardee_user_id}, #{rewardee_user_name}, #{reward_bakers}, #{reward_msg}, #{reward_time}, #{note})
+   </insert> 
+   
+   <update id="updateRewardOrderno" parameterType="com.xinlianfeng.yibaker.common.entity.RewardRecord">
+   	update YB_T_REWARD_RECORD set REWARD_ORDERNO = #{reward_orderno} where REWARD_NO = #{reward_no}
+   </update>
+   
+   <select id="findRewardRecordCntToday" parameterType="com.xinlianfeng.yibaker.common.entity.RewardRecord" resultType="int">
+   	select count(1)  from YB_T_REWARD_RECORD where REWARDER_USER_ID = #{rewarder_user_id} and REWARDEE_USER_ID = #{rewardee_user_id} and from_unixtime(REWARD_TIME/1000, '%Y-%m-%d') = curdate()
+   </select>
+   
+   <select id="findOneByRewardNo" resultType="com.xinlianfeng.yibaker.common.entity.RewardRecord">
+   	select REWARD_NO, REWARD_ORDERNO, REWARDER_USER_ID, REWARDER_USER_NAME, REWARDEE_USER_ID, REWARDEE_USER_NAME, REWARD_BAKERS, REWARD_MSG, REWARD_TIME, NOTE
+   	 from YB_T_REWARD_RECORD
+   	 where REWARD_NO = #{reward_no}
+   </select>
+</mapper>

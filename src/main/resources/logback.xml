@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<substitutionProperty name="log.base" value="./logs" />
+	
+	<!--appender 输出目的地 console 控制台 -->
+	<appender name="LOGBACK_CONSOLE" class="ch.qos.logback.core.ConsoleAppender" target="System.out">
+		<encoder charset="UTF-8">
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - [%-5level] [%thread] [%logger{108}] - %msg%n</pattern>
+		</encoder>
+		<target>System.out</target>
+	</appender>
+
+	<!--appender 输出目的地 file 文件 -->
+	<appender name="LOGBACK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${log.base}/logback.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.base}/logback-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+			<TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+    			<MaxFileSize>10MB</MaxFileSize>
+   			</TimeBasedFileNamingAndTriggeringPolicy>
+			<MaxHistory>30</MaxHistory>
+		</rollingPolicy>
+
+		<!-- 编码格式解析器 -->
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - [%-5level] [%thread] [%logger{108}] - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 数据处理量记录写入目的地 -->
+	<appender name="ASYNC_LOGBACK_FILE" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<queueSize>10000</queueSize>
+		<appender-ref ref="LOGBACK_FILE" />
+	</appender>
+
+	<root level="DEBUG">
+		<appender-ref ref="LOGBACK_CONSOLE" />
+		<appender-ref ref="ASYNC_LOGBACK_FILE" />
+	</root>
+</configuration>  

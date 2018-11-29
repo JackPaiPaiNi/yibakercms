@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+   
+    <!-- 将多个配置文件读取到容器中，交给Spring管理 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- 数据库连接池配置 -->
+	<bean id="proxoolDataSource" class="org.logicalcobwebs.proxool.ProxoolDataSource">
+		<property name="alias" value="${jdbc-0.proxool.alias}" />
+		<property name="driver" value="${jdbc-0.proxool.driver-class}" />
+		<property name="driverUrl" value="${jdbc-0.proxool.driver-url}" />
+		<property name="user" value="${jdbc-0.proxool.username}" />
+		<property name="password" value="${jdbc-0.proxool.password}" />
+		<property name="houseKeepingTestSql" value="${jdbc-0.proxool.house-keeping-test-sql}" />
+		<property name="prototypeCount" value="${jdbc-0.proxool.prototype-count}" />
+		<property name="houseKeepingSleepTime" value="${jdbc-0.proxool.house-keeping-sleep-time}" />
+		<property name="maximumActiveTime" value="${jdbc-0.proxool.maximum-active-time}" />
+		<property name="maximumConnectionLifetime" value="${jdbc-0.proxool.maximum-connection-lifetime}" />
+		<property name="minimumConnectionCount" value="${jdbc-0.proxool.minimum-connection-count}" />
+		<property name="maximumConnectionCount" value="${jdbc-0.proxool.maximum-connection-count}" />
+		<property name="statistics" value="${jdbc-0.proxool.statistics}" />
+		<property name="statisticsLogLevel" value="${jdbc-0.proxool.statistics-log-level}" />
+		<property name="trace" value="${jdb-0.proxool.trace}" />
+		<property name="verbose" value="${jdb-0.proxool.verbose}" />
+	</bean>
+
+	<!-- 创建SqlSessionFactory，同时指定数据源 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="proxoolDataSource" />
+		<property  name="mapperLocations"  value="classpath*:com/xinlianfeng/yibaker/provider/dao/**/*.xml"/>
+	</bean>
+
+	<!-- 创建SqlSessionTemplate,mybatis spring模版 -->
+	<!-- <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>   -->
+	
+	<!-- 使用annotation定义事务 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="proxoolDataSource" />
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- <property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate" /> -->
+	    <property name="basePackage" value="com.xinlianfeng.yibaker.provider.dao" />
+	</bean>
+	
+	<!-- 开启注解处理器 -->  
+ 	<context:annotation-config/>  
+	
+	<!-- enable transaction annotation support -->
+	<tx:annotation-driven transaction-manager="txManager" proxy-target-class="true" />
+	
+    <!--  -->
+    <!-- 扫描注解Bean -->
+    <context:component-scan base-package="com.xinlianfeng.yibaker.provider" use-default-filters="true">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+</beans>

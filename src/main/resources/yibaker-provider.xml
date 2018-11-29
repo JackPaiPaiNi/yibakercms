@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	<!-- 提供方应用信息，用于计算依赖关系 -->
+	<dubbo:application name="${dubbo.application.name}"/>
+	<!-- 使用zookeeper注册中心暴露服务地址 -->
+	<dubbo:registry address="${dubbo.registry.address}" />
+	<!-- 用dubbo协议在20880端口暴露服务 -->
+	<dubbo:protocol name="${dubbo.protocol.name}" port="${dubbo.protocol.port}" />
+	<!-- 使用监控协议 -->
+	<dubbo:monitor protocol="${dubbo.monitor.protocol}"/>
+	
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.UserService" version="1.0.0" ref="userService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.RecipeService" version="1.0.0" ref="recipeService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.CurveService" version="1.0.0" ref="curveService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.DeviceService" version="1.0.0" ref="deviceService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.SNSService" version="1.0.0" ref="snsService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.UserCenterService" version="1.0.0" ref="userCenterService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.SubjectService" version="1.0.0" ref="subjectService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.GeneralService" version="1.0.0" ref="generalService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.CookieAuthService" version="1.0.0" ref="cookieAuthService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.MissionService" version="1.0.0" ref="missionService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.TradeRecordService" version="1.0.0" ref="tradeRecordService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.BakerService" version="1.0.0" timeout="3000" ref="bakerService" />
+	<dubbo:service interface="com.xinlianfeng.yibaker.common.service.KeyWordService" version="1.0.0" ref="keyWordService"/>
+</beans>

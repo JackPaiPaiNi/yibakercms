@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeToolDao">
+
+	<insert id="createRecipeCurve" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeTool"  useGeneratedKeys="true" keyProperty="tool_id">
+		insert into
+		YB_T_RECIPE_TOOL (
+		RECIPE_ID, 
+		TOOL_NAME)
+		values (
+		#{recipe_id}, 
+		#{tool_name})
+	</insert>
+
+</mapper>

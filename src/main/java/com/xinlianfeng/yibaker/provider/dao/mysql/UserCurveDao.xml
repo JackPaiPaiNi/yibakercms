@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserCurveDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.UserCurve"  useGeneratedKeys="true" keyProperty="curve_id">
+		insert into
+		YB_T_USER_CURVE (
+		YB_USER_ID,
+		DEVICE_ID, 
+		<if test="0 != device_type">
+			DEVICE_TYPE,
+		</if>
+		CURVE_NAME, 
+		CREATE_TIME, 
+		CURVE_CONTENT)
+		values (
+		#{yb_user_id}, 
+		#{device_id},
+		<if test="0 != device_type">
+			#{device_type}, 
+		</if>
+		#{curve_name}, 
+		#{create_time}, 
+		#{curve_content})
+	</insert>
+
+    <update id="update" parameterType="com.xinlianfeng.yibaker.common.entity.UserCurve">
+        update YB_T_USER_CURVE 
+        	<set>
+        		<if test="null != curve_name and '' != curve_name ">
+        			CURVE_NAME = #{curve_name},
+        		</if>
+        		<if test="null != curve_content and '' != curve_content ">
+        			CURVE_CONTENT = #{curve_content}
+        		</if>
+        	</set>
+        	where YB_USER_ID = #{yb_user_id} and CURVE_ID = #{curve_id} and DR = 0
+    </update>
+
+    <update id="delete" >
+        update YB_T_USER_CURVE set DR = 1 where YB_USER_ID = #{yb_user_id} and CURVE_ID = #{curve_id} and DR = 0
+    </update>
+
+    <select id="getInfo" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserCurve">
+       <include refid="selectUserCurveSql"></include>
+		<where>
+			 YB_USER_ID = #{yb_user_id} and  CURVE_ID=#{curve_id} and DR = 0
+		</where>
+    </select>
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.UserCurve">
+        <include refid="selectUserCurveSql"></include>
+		<where>
+			<if test="0 != yb_user_id">
+				and YB_USER_ID = #{yb_user_id}
+			</if>
+			<if test="0 != curve_id">
+				<![CDATA[
+					and CURVE_ID < #{curve_id}
+				]]> 
+			</if>
+			<if test="0 != device_type">
+				and DEVICE_TYPE = #{device_type}
+			</if>
+			and DR = 0
+		</where>
+		 order by CREATE_TIME desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_USER_CURVE 
+   	 	<where>
+			<if test="0 != yb_user_id">
+				and YB_USER_ID = #{yb_user_id}
+			</if>
+			<if test="0 != curve_id">
+				<![CDATA[
+					and CURVE_ID < #{curve_id}
+				]]> 
+			</if>
+			<if test="0 != device_type">
+				and DEVICE_TYPE = #{device_type}
+			</if>
+			and DR = 0
+		</where>
+    </select>
+    
+    <select id="getListByManuId" resultType="com.xinlianfeng.yibaker.common.entity.UserCurve">
+    	<include refid="selectUserCurveSql"></include>
+    	<where>
+    		<if test="0 != yb_user_id">
+				and YB_USER_ID = #{yb_user_id}
+			</if>
+			<if test="0 != curve_id">
+				<![CDATA[
+					and CURVE_ID < #{curve_id}
+				]]> 
+			</if>
+			<choose>
+				<when test="202==manu_id">
+				    and DEVICE_TYPE=3
+				</when>
+				<when test="201==manu_id or 0==manu_id">
+				    and (DEVICE_TYPE=1 or DEVICE_TYPE=2)
+				</when>
+				<otherwise>
+					and DEVICE_TYPE=0
+				</otherwise>
+			</choose>
+			and DR = 0
+    	</where>
+    	order by CREATE_TIME desc limit #{limit}
+    </select>
+    
+    <select id="getTotalByManuId" resultType="int">
+        select count(*) from YB_T_USER_CURVE
+    	<where>
+    		<if test="0 != yb_user_id">
+				and YB_USER_ID = #{yb_user_id}
+			</if>
+			<if test="0 != curve_id">
+				<![CDATA[
+					and CURVE_ID < #{curve_id}
+				]]> 
+			</if>
+			<choose>
+				<when test="202==manu_id">
+				    and DEVICE_TYPE=3
+				</when>
+				<when test="201==manu_id or 0==manu_id">
+				    and (DEVICE_TYPE=1 or DEVICE_TYPE=2)
+				</when>
+				<otherwise>
+					and DEVICE_TYPE=0
+				</otherwise>
+			</choose>
+			and DR = 0
+    	</where>
+    </select>
+
+   <sql id="selectUserCurveSql">
+    	SELECT 
+		    CURVE_ID,
+		    YB_USER_ID,
+		    DEVICE_ID,
+		    DEVICE_TYPE,
+		    CURVE_NAME,
+		    CREATE_TIME,
+		    CURVE_CONTENT
+		FROM
+		    YB_T_USER_CURVE
+    </sql>
+
+   <sql id="selectUserCurveBriefSql">
+    	SELECT 
+		    CURVE_ID,
+		    YB_USER_ID,
+		    DEVICE_ID,
+		    DEVICE_TYPE,
+		    CURVE_NAME,
+		    CREATE_TIME
+		FROM
+		    YB_T_USER_CURVE
+    </sql>
+
+</mapper>

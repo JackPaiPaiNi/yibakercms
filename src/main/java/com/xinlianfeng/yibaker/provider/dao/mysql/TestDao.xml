@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.TestDao">
+
+   <insert id="createFirst" parameterType="long">
+    	insert into Table_15 (Column_1) values (#{first})
+   </insert> 
+   
+   <select id="findLastFirst" resultType="long">
+   		select Column_1 from Table_15 order by Column_1 desc limit 1
+   </select>
+
+   <insert id="createSecond" parameterType="long">
+    	insert into Table_17 (Column_1) values (#{second})
+   </insert> 
+</mapper>

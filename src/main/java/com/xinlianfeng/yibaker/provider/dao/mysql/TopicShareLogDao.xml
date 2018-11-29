@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.TopicShareLogDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.TopicShareLog"  useGeneratedKeys="true" keyProperty="share_id">
+		insert into YB_T_SNS_TOPIC_SHARE_LOG (
+			YB_USER_ID, 
+			TOPIC_ID, 
+			SHARE_TP_TYPE, 
+			SHARE_TIME)
+		values (
+			#{yb_user_id},
+			#{topic_id}, 
+			#{share_tp_type}, 
+			#{share_time})
+	</insert>
+
+</mapper>

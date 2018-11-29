@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.DeviceOpLogDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.DeviceOpLog"  useGeneratedKeys="true" keyProperty="log_id">
+		insert into YB_T_DEVICE_OP_LOG (
+			YB_USER_ID, 
+			DEVICE_ID, 
+			DEVICE_TYPE, 
+			DEVICE_NAME,
+			OP_TYPE,
+			OP_ID,
+			OP_NAME,
+			OP_IMAGE,
+			OP_TIME,
+			OP_DURATION)
+		values (
+			#{yb_user_id},
+			#{device_id}, 
+			#{device_type}, 
+			#{device_name},
+			#{op_type},
+			#{op_id},
+			#{op_name},
+			#{op_image},
+			#{op_time},
+			#{op_duration})
+	</insert>
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.DeviceOpLog">
+        <include refid="selectDeviceOpLogListSql"></include>
+		<where>
+			<if test="0 != yb_user_id">
+				YB_USER_ID = #{yb_user_id}
+			</if>
+       		<if test="null != device_id and '' != device_id ">
+       			and DEVICE_ID = #{device_id}
+       		</if>
+			<if test="0 != log_id">
+				<![CDATA[
+					and LOG_ID < #{log_id}
+				]]> 
+			</if>
+		</where>
+		 order by LOG_ID desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_DEVICE_OP_LOG
+		<where>
+			<if test="0 != yb_user_id">
+				YB_USER_ID = #{yb_user_id}
+			</if>
+       		<if test="null != device_id and '' != device_id ">
+       			and DEVICE_ID = #{device_id}
+       		</if>
+		</where>
+    </select>
+
+   <sql id="selectDeviceOpLogListSql">
+    	SELECT 
+		    LOG_ID,
+		    YB_USER_ID,
+		    DEVICE_ID,
+		    DEVICE_TYPE,
+		    DEVICE_NAME,
+		    OP_TYPE,
+		    OP_ID,
+		    OP_NAME,
+		    OP_IMAGE,
+		    OP_TIME,
+		    OP_DURATION
+		FROM
+		    YB_T_DEVICE_OP_LOG
+    </sql>
+
+</mapper>

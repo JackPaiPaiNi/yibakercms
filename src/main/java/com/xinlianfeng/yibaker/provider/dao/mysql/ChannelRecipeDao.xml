@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ChannelRecipeDao">
+
+	<!-- 类别菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="channelRecipeResultMap" >
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 类别菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeListResp" id="channelRecipeListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="channelRecipeResultMap"/>
+	</resultMap>
+	
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.Recipe" id="recipeResultMap">  
+	    <id property="recipe_id" column="RECIPE_ID" />  
+	    <result property="recipe_name" column="RECIPE_NAME" />  
+	    <result property="recipe_image" column="RECIPE_IMAGE" />  
+	    <result property="recipe_no" column="RECIPE_NO" />  
+	    <result property="recipe_manuid" column="RECIPE_MANUID" />  
+	</resultMap>  
+	
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeChannelEx" id="recipeChannelExResultMap">
+		 <id property="channel_id" column="CHANNEL_ID" />
+		 <result property="channel_name" column="CHANNEL_NAME" />
+		 <result property="icon" column="ICON" />
+		 <collection property="recipes" ofType="com.xinlianfeng.yibaker.common.entity.Recipe" resultMap="recipeResultMap"></collection>   
+	</resultMap>
+
+ 	<!-- 创建菜谱分类关联信息 -->
+	<insert id="create">
+		insert into
+		YB_T_RECIPE_CHANNEL_LINK (
+		CHANNEL_ID,
+		RECIPE_ID)
+		values (
+		#{channel_id}, 
+		#{recipe_id})
+	</insert>
+
+ 	<!-- 查询该类别菜谱列表 -->
+    <select id="getList" resultMap ="channelRecipeListMap">
+        <include refid="selectListSql"></include>
+		<where>
+			rc.CHANNEL_ID = #{channel_id}
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+			<if test="0 != recipe_id">
+				<![CDATA[
+					and r.RECIPE_ID < #{recipe_id}
+				]]> 
+			</if>
+		</where>
+		 order by r.RECIPE_ID desc limit #{limit}
+    </select>
+     	<!-- 查询该类别菜谱列表 必须有曲线 -->
+    <select id="getListAndCurve" resultMap ="channelRecipeListMap">
+        <include refid="selectListSql"></include>
+		<where>
+			rc.CHANNEL_ID = #{channel_id}
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0 
+			and r.RECIPE_TYPE = 1
+			and re.RECIPE_MANUID = #{recipe_manuid}
+			<if test="0 != recipe_id">
+				<![CDATA[
+					and r.RECIPE_ID < #{recipe_id}
+				]]> 
+			</if>
+		</where>
+		 order by r.RECIPE_ID desc limit #{limit}
+    </select>
+
+	<!-- 查询该类别菜谱总数 -->
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_RECIPE_CHANNEL_LINK rc 
+			LEFT JOIN
+		YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+ 		<where>
+			rc.CHANNEL_ID = #{channel_id}
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+		</where>
+    </select>
+    <!-- 查询该类别菜谱总数    201厂商为一焙 -->
+    <select id="getTotalandCurve" resultType="int">
+   	 	select count(*) from YB_T_RECIPE_CHANNEL_LINK rc 
+			LEFT JOIN
+		YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+			LEFT JOIN
+		YB_T_RECIPE_EXT ext ON ext.RECIPE_ID = r.RECIPE_ID
+ 		<where>
+			rc.CHANNEL_ID = #{channel_id}
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+			and r.RECIPE_TYPE = 1
+			AND ext.RECIPE_MANUID = 201
+		</where>
+    </select>
+
+	<!-- 查询该类别菜谱列表sql -->
+    <sql id="selectListSql">
+     	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE_CHANNEL_LINK rc
+				LEFT JOIN
+			YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+				LEFT JOIN 
+			YB_T_RECIPE_EXT re on re.RECIPE_ID = r.RECIPE_ID
+    </sql>
+    
+    <select id="findChannelsWithRecipes" resultMap="recipeChannelExResultMap">
+    	select rc.CHANNEL_ID,rc.CHANNEL_NAME,rc.ICON,r.RECIPE_ID,r.RECIPE_NAME,r.RECIPE_IMAGE,re.RECIPE_NO,re.RECIPE_MANUID  
+    		from YB_T_RECIPE_CHANNEL rc 
+    		left join YB_T_RECIPE_CHANNEL_LINK rcl on rcl.CHANNEL_ID = rc.CHANNEL_ID 
+    		left join (select r2.* from YB_T_RECIPE r2 left join YB_T_RECIPE_CHANNEL_LINK rcl2 on rcl2.RECIPE_ID = r2.RECIPE_ID where rcl2.CHANNEL_ID = #{brand_channel_id} )  r on r.RECIPE_ID = rcl.RECIPE_ID
+    		left join YB_T_RECIPE_EXT re on re.RECIPE_ID = r.RECIPE_ID
+    		where rc.CHANNEL_PID = #{bakemode_channel_pid} 
+    </select>
+    
+    <select id="findChannels" resultType="com.xinlianfeng.yibaker.common.entity.RecipeChannel">
+    	select CHANNEL_NAME,CHANNEL_ID,GRADE,PATH,SORT,CREATE_TIME,ICON,NOTE   
+    		from YB_T_RECIPE_CHANNEL  
+    		where CHANNEL_PID = #{channel_pid} 
+    </select>
+    
+    <!-- 分类（可以指定系统默认食谱类型 type：1 系统默认；2非系统默认；3所有）查询该类别菜谱列表 -->
+    <select id="getTypeList" resultMap="recipeChannelExResultMap">
+        select rc.CHANNEL_ID,rc.CHANNEL_NAME,rc.ICON,r.RECIPE_ID,r.RECIPE_NAME,r.RECIPE_IMAGE,re.RECIPE_NO,re.RECIPE_MANUID   
+    		from YB_T_RECIPE_CHANNEL rc 
+    		left join YB_T_RECIPE_CHANNEL_LINK rcl on rcl.CHANNEL_ID = rc.CHANNEL_ID 
+    		left join (select r2.* from YB_T_RECIPE r2 left join YB_T_RECIPE_CHANNEL_LINK rcl2 on rcl2.RECIPE_ID = r2.RECIPE_ID where rcl2.CHANNEL_ID = #{brand_channel_id} )  r on r.RECIPE_ID = rcl.RECIPE_ID
+    		left join YB_T_RECIPE_EXT re on re.RECIPE_ID = r.RECIPE_ID
+    		where rc.CHANNEL_ID = #{channel_id} 
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0 
+			<if test="0 != last_id">
+				<![CDATA[
+					and r.RECIPE_ID < #{last_id} 
+				]]> 
+			</if>
+			<if test="1 == type">
+				<![CDATA[
+					and ( r.YB_USER_ID >=8000 or r.YB_USER_ID <=10000 ) 
+				]]> 
+			</if>
+			<if test="2 == type">
+				<![CDATA[
+					and ( r.YB_USER_ID >=10000 or r.YB_USER_ID <=8000 ) 
+				]]> 
+			</if>
+		 order by r.RECIPE_ID desc limit #{limit}
+    </select>
+    
+    <!-- 查询该分类类别菜谱总数 -->
+    <select id="getTypeTotal" resultType="int">
+   	 	select count(r.RECIPE_ID)   
+    		from YB_T_RECIPE_CHANNEL rc 
+    		left join YB_T_RECIPE_CHANNEL_LINK rcl on rcl.CHANNEL_ID = rc.CHANNEL_ID 
+    		left join (select r2.* from YB_T_RECIPE r2 left join YB_T_RECIPE_CHANNEL_LINK rcl2 on rcl2.RECIPE_ID = r2.RECIPE_ID where rcl2.CHANNEL_ID = #{brand_channel_id} )  r on r.RECIPE_ID = rcl.RECIPE_ID
+    		left join YB_T_RECIPE_EXT re on re.RECIPE_ID = r.RECIPE_ID
+    		where rc.CHANNEL_ID = #{channel_id} 
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0 
+			<if test="1 == type">
+				<![CDATA[
+					and ( r.YB_USER_ID >=8000 or r.YB_USER_ID <=10000 ) 
+				]]> 
+			</if>
+			<if test="2 == type">
+				<![CDATA[
+					and ( r.YB_USER_ID >=10000 or r.YB_USER_ID <=8000 ) 
+				]]> 
+			</if>
+    </select>
+    
+    <select id="findBrandChannel" resultType="com.xinlianfeng.yibaker.common.entity.RecipeChannel">
+    	select rc.CHANNEL_ID,rc.CHANNEL_NAME,rc.ICON, count(r.RECIPE_ID) AS recipe_cnt   
+    		from YB_T_RECIPE_CHANNEL rc 
+    		left join YB_T_RECIPE_CHANNEL_LINK rcl on rcl.CHANNEL_ID = rc.CHANNEL_ID 
+    		left join (select r2.* from YB_T_RECIPE r2 left join YB_T_RECIPE_CHANNEL_LINK rcl2 on rcl2.RECIPE_ID = r2.RECIPE_ID where rcl2.CHANNEL_ID = #{brand_channel_id} )  r on r.RECIPE_ID = rcl.RECIPE_ID
+    		where rc.CHANNEL_ID = #{brand_channel_id} 
+    		<![CDATA[
+				and ( r.YB_USER_ID >=8000 or r.YB_USER_ID <=10000 ) 
+			]]> 
+    </select>
+
+</mapper>

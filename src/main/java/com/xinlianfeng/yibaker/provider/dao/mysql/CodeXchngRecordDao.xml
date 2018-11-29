@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.CodeXchngRecordDao">
+
+   <insert id="createCodeXchngRecord" parameterType="com.xinlianfeng.yibaker.common.entity.CodeXchngRecord" useGeneratedKeys="true" keyProperty="xchng_no">
+   	insert into YB_T_CODEXCHNG_RECORD (XCHNG_ORDERNO, XCHNG_USER_ID, XCHNG_USER_NAME, XCHNG_CID, XCHNG_CODE, XCHNG_BAKERS, XCHNG_TIME, NOTE ) 
+   	 values (#{xchng_orderno}, #{xchng_user_id}, #{xchng_user_name}, #{xchng_cid}, #{xchng_code}, #{xchng_bakers}, #{xchng_time}, #{note} )
+   </insert> 
+   
+   <update id="updateCodeXchngRecordOrderno" parameterType="com.xinlianfeng.yibaker.common.entity.CodeXchngRecord">
+   	update YB_T_CODEXCHNG_RECORD set XCHNG_ORDERNO = #{xchng_orderno} where XCHNG_NO = #{xchng_no}
+   </update>
+</mapper>

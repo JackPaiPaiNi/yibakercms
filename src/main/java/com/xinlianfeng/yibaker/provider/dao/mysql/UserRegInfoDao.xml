@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserRegInfoDao">
+
+    <!-- 创建用户注册信息  -->
+    <insert id="createUser" parameterType="com.xinlianfeng.yibaker.common.entity.UserRegInfo"  useGeneratedKeys="true" keyProperty="yb_user_id">
+    	insert into 
+    	YB_T_USER_REGINFO (PASSWD, MOBILE, EMAIL, REG_TIME, STATUS) 
+    	values (#{passwd}, #{mobile}, #{email}, #{reg_time}, #{status})
+    </insert>
+    
+    <!-- 密码校验  -->
+    <select id="checkPasswd" parameterType="com.xinlianfeng.yibaker.common.entity.UserRegInfo" resultType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+        select * from YB_T_USER_REGINFO where PASSWD = #{passwd}
+		<if test="null != yb_user_id and ''!= yb_user_id">
+			and YB_USER_ID = #{yb_user_id} 
+		</if>
+		<if test="null != mobile and '' != mobile">
+			and MOBILE = #{mobile} 
+		</if>
+		<if test="null != email and '' != email">
+			and EMAIL = #{email} 
+		</if>
+   </select>
+
+    <!-- 手机校验  -->
+   <select id="checkMobile" resultType="int">
+        select count(*) from YB_T_USER_REGINFO where MOBILE = #{mobile}
+   </select>
+
+    <!-- 查询用户密码  -->
+    <select id="findPasswd" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+       select PASSWD from YB_T_USER_REGINFO where YB_USER_ID = #{yb_user_id}
+    </select>
+
+    <!-- 更改用户密码  -->
+    <update id="changePasswd" parameterType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+        update YB_T_USER_REGINFO 
+        	<set>
+        		<if test="null != passwd and '' != passwd ">
+        			PASSWD = #{passwd},
+        		</if>
+        	</set>
+        	where YB_USER_ID = #{yb_user_id}
+    </update>
+
+     <!-- 重设用户密码  -->
+    <update id="resetPasswd" parameterType="com.xinlianfeng.yibaker.common.req.ResetPasswdReq">
+        update YB_T_USER_REGINFO 
+        	<set>
+        		<if test="null != new_passwd and '' != new_passwd ">
+        			PASSWD = #{new_passwd},
+        		</if>
+        	</set>
+        	where MOBILE = #{mobile}
+    </update>
+
+    <!-- 查询绑定的手机  -->
+    <select id="getMobile" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+       select MOBILE from YB_T_USER_REGINFO where YB_USER_ID = #{yb_user_id}
+    </select>
+
+    <!-- 绑定手机  -->
+    <update id="addMobile" parameterType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+        update YB_T_USER_REGINFO 
+        	<set>
+        		<if test="null != mobile and '' != mobile ">
+        			MOBILE = #{mobile},
+        		</if>
+        	</set>
+        	where YB_USER_ID = #{yb_user_id}
+    </update>
+    
+    
+    <update id="updateUserRegInfo" parameterType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+        update YB_T_USER_REGINFO 
+        	<set>
+        		<if test="null != mobile and '' != mobile ">
+        			MOBILE = #{mobile},
+        		</if>
+        		<if test="null != passwd and '' != passwd ">
+        			PASSWD = #{passwd}
+        		</if>
+        	</set>
+        	where YB_USER_ID = #{yb_user_id}
+    </update>
+    
+    <select id="findUserRegInfos"  resultType="com.xinlianfeng.yibaker.common.entity.UserRegInfo">
+       select ur.YB_USER_ID,ui.NICKNAME as EMAIL from YB_T_USER_REGINFO ur left join YB_T_USER_INFO ui on ur.YB_USER_ID = ui.YB_USER_ID where ur.YB_USER_ID > #{yb_user_id} order by ur.YB_USER_ID asc limit #{row_cnt}
+    </select>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserEasemobDao">
+
+    <!-- 创建用户环信帐户信息  -->
+    <insert id="createUserEasemob" parameterType="com.xinlianfeng.yibaker.common.entity.UserEasemob">
+    	insert into 
+    	YB_T_USER_EASEMOB (YB_USER_ID, USERNAME, PASSWORD, CTIME, NOTE) 
+    	values (#{yb_user_id}, #{username}, #{password}, #{ctime}, #{note})
+    </insert>
+
+	<delete id="deleteUserEasemob" parameterType="long">
+		delete from YB_T_USER_EASEMOB where YB_USER_ID = #{yb_user_id}
+	</delete>
+	
+	<delete id="deleteUserEasemobByUsername" parameterType="string">
+		delete from YB_T_USER_EASEMOB where USERNAME = #{username}
+	</delete>
+	
+	<delete id="deleteUserEasemobAll" >
+		delete from YB_T_USER_EASEMOB
+	</delete>
+	
+	<select id="findUserEasemobs"  resultType="com.xinlianfeng.yibaker.common.entity.UserEasemob">
+       select * from YB_T_USER_EASEMOB where YB_USER_ID > #{yb_user_id} order by YB_USER_ID asc limit #{row_cnt}
+    </select>
+    
+	<select id="findUserEasemob" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserEasemob">
+       select * from YB_T_USER_EASEMOB where YB_USER_ID = #{yb_user_id}
+    </select>
+</mapper>

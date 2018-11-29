@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ShareLogDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.ShareLog"  useGeneratedKeys="true" keyProperty="share_id">
+		insert into YB_T_SNS_SHARE_LOG (
+			YB_USER_ID, 
+			SRC_TYPE,
+			SRC_ID, 
+			SHARE_TP_TYPE, 
+			SHARE_TIME)
+		values (
+			#{yb_user_id},
+			#{src_type},
+			#{src_id}, 
+			#{share_tp_type}, 
+			#{share_time})
+	</insert>
+
+</mapper>

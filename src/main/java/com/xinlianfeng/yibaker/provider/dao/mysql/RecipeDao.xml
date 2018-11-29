@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeDao">
+
+	<!-- 菜谱简介 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeBriefInfo" id="recipeBriefInfoResultMap">  
+	    <id property="recipe_id" column="RECIPE_ID" />  
+	    <result property="recipe_name" column="RECIPE_NAME" />  
+	    <result property="recipe_type" column="RECIPE_TYPE" />  
+	    <result property="recipe_brief" column="RECIPE_BRIEF" />  
+	    <result property="recipe_image" column="RECIPE_IMAGE" />  
+	    <result property="recipe_video" column="RECIPE_VIDEO" />  
+	    <result property="degree" column="DEGREE" />  
+	    <result property="time_range" column="TIME_RANGE" />  
+	    <result property="recipe_no" column="RECIPE_NO" />  
+	    <result property="recipe_manuid" column="RECIPE_MANUID" />  
+	</resultMap>  
+	
+	<!-- 菜谱详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.Recipe" id="recipeResultMap">  
+	    <id property="recipe_id" column="RECIPE_ID" />  
+	    <result property="recipe_name" column="RECIPE_NAME" />  
+	    <result property="recipe_type" column="RECIPE_TYPE" />  
+	    <result property="keyword" column="KEYWORD" />  
+	    <result property="recipe_brief" column="RECIPE_BRIEF" />  
+	    <result property="recipe_content" column="RECIPE_CONTENT" />  
+	    <result property="recipe_image" column="RECIPE_IMAGE" />  
+	    <result property="recipe_video" column="RECIPE_VIDEO" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	    <result property="update_time" column="UPDATE_TIME" />  
+	    <result property="recipe_price" column="RECIPE_PRICE" />  
+	    <result property="degree" column="DEGREE" />  
+	    <result property="time_range" column="TIME_RANGE" />  
+	    <result property="recipe_status" column="RECIPE_STATUS" />  
+	    <result property="e_mall_url" column="E_MALL_URL" />  
+	    <result property="recipe_no" column="RECIPE_NO" />  
+	    <result property="recipe_manuid" column="RECIPE_MANUID" />  
+	</resultMap>  
+	
+	<!-- 专题菜谱详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.Recipe" id="topicRecipeResultMap">  
+	    <id property="recipe_id" column="RECIPE_ID" />  
+	    <result property="recipe_name" column="RECIPE_NAME" />  
+	    <result property="recipe_type" column="RECIPE_TYPE" />  
+	    <result property="keyword" column="KEYWORD" />  
+	    <result property="recipe_brief" column="RECIPE_BRIEF" />  
+	    <result property="recipe_content" column="RECIPE_CONTENT" />  
+	    <result property="recipe_image" column="RECIPE_IMAGE" />  
+	    <result property="recipe_video" column="RECIPE_VIDEO" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	    <result property="update_time" column="UPDATE_TIME" />  
+	    <result property="recipe_price" column="RECIPE_PRICE" />  
+	    <result property="degree" column="DEGREE" />  
+	    <result property="time_range" column="TIME_RANGE" />  
+	    <result property="recipe_status" column="RECIPE_STATUS" />  
+	    <result property="e_mall_url" column="E_MALL_URL" />  
+	    <result property="description" column="DESCRIPTION" />  
+	</resultMap>  
+	
+	<!-- 专题菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="topicRecipeInfoMap" >
+		<association property="recipe" resultMap="topicRecipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 菜谱所有相关信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="recipeDetailResultMap">
+		<association property="recipe" resultMap="recipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="tip" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeTipDao.recipeTipResultMap"/>
+		<collection  property="ingredientlist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.entity.RecipeIngredient" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeIngredientDao.recipeIngredientResultMap"/>
+		<collection  property="processlist" column="recipe_id" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.entity.RecipeProcess"  select="com.xinlianfeng.yibaker.provider.dao.RecipeProcessDao.getRecipeProcessList"/>
+	</resultMap>
+
+	<!-- 菜谱数据 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDataResp" id="recipeDataResultMap">
+		<association property="recipe" resultMap="recipeResultMap"/>
+		<association property="curve" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeCurveDao.recipeCurveResultMap"/>
+		<association property="tip" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeTipDao.recipeTipResultMap"/>
+		<collection  property="ingredientlist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.entity.RecipeIngredient" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeIngredientDao.recipeIngredientResultMap"/>
+		<collection  property="processlist" column="recipe_id" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.entity.RecipeProcess"  select="com.xinlianfeng.yibaker.provider.dao.RecipeProcessDao.getRecipeProcessList"/>
+	</resultMap>
+
+	<!-- 我发布的菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="myRecipeResultMap" >
+		<association property="recipe" resultMap="recipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+	</resultMap>
+
+	<!-- 我发布的菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeListResp" id="myListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="myRecipeResultMap"/>
+	</resultMap>
+
+	<!-- 我收藏/下载的菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeBriefResp" id="otherRecipeResultMap" >
+		<association property="recipebrief" resultMap="recipeBriefInfoResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="op_time" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.snsOpTimeResultMap"/>
+	</resultMap>
+
+	<!-- 我收藏/下载的菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeBriefListResp" id="otherListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeBriefResp" resultMap="otherRecipeResultMap"/>
+	</resultMap>
+
+	<!-- 搜索的菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="searchRecipeResultMap" >
+		<association property="recipe" resultMap="recipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 搜索的菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeListResp" id="searchListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="searchRecipeResultMap"/>
+	</resultMap>
+
+	<!-- 发布菜谱 -->
+	<insert id="createRecipe" parameterType="com.xinlianfeng.yibaker.common.entity.Recipe"  useGeneratedKeys="true" keyProperty="recipe_id">
+		insert into
+		YB_T_RECIPE (
+		RECIPE_NAME, 
+		RECIPE_TYPE, 
+		RECIPE_BRIEF, 
+		RECIPE_CONTENT, 
+		RECIPE_IMAGE, 
+		RECIPE_VIDEO, 
+		YB_USER_ID,
+		CREATE_TIME, 
+		UPDATE_TIME, 
+		RECIPE_PRICE, 
+		DEGREE, 
+		TIME_RANGE, 
+		RECIPE_STATUS)
+		values (
+		#{recipe_name}, 
+		#{recipe_type}, 
+		#{recipe_brief},
+		#{recipe_content}, 
+		#{recipe_image}, 
+		#{recipe_video}, 
+		#{yb_user_id}, 
+		#{create_time}, 
+		#{update_time},
+		#{recipe_price},
+		#{degree},
+		#{time_range},
+		#{recipe_status})
+	</insert>
+
+	<!-- 查询菜谱详情 -->
+    <select id="getRecipeDetail" resultMap ="recipeDetailResultMap">
+    	<include refid="selectRecipeDetailSql"></include>
+    	<where> 
+    		r.RECIPE_ID = #{recipe_id} and r.RECIPE_STATUS = 1 and r.DR = 0
+    	</where>
+    </select>
+
+	<!-- 获取菜谱执行数据 -->
+    <select id="getRecipeData" resultMap ="recipeDataResultMap">
+    	<include refid="selectRecipeDataSql"></include>
+    	<where> r.RECIPE_ID = #{recipe_id} and r.RECIPE_STATUS = 1 and r.DR = 0</where>
+    </select>
+
+	<!-- 获取我认证失败的菜谱数据 -->
+    <select id="getMyFailData" resultMap ="recipeDataResultMap">
+    	<include refid="selectRecipeDataSql"></include>
+    	<where> 
+    		r.YB_USER_ID = #{yb_user_id}
+    		and r.RECIPE_ID = #{recipe_id} 
+    		and r.RECIPE_STATUS = 2 
+    		and r.DR = 0
+    	</where>
+    </select>
+
+ 	<!-- 查询菜谱定价 -->
+     <select id="getRecipePrice"  resultType="int">
+     	select ifnull(sum(RECIPE_PRICE),0) RECIPE_PRICE from YB_T_RECIPE where RECIPE_ID = #{recipe_id} and RECIPE_STATUS = 1 and DR = 0
+    </select>
+
+ 	<!-- 查询菜谱简介 -->
+     <select id="getRecipeBriefInfo" resultMap ="recipeBriefInfoResultMap">
+      	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_IMAGE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE r
+		left join YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+		WHERE r.RECIPE_ID = #{recipe_id} and r.RECIPE_STATUS = 1 and r.DR = 0
+    </select>
+
+ 	<!-- 查询菜谱信息 -->
+     <select id="getRecipeInfo" resultMap ="recipeResultMap">
+      	SELECT  
+		    RECIPE_ID,
+		    RECIPE_NAME,
+		    RECIPE_TYPE,
+		    KEYWORD,
+		    RECIPE_BRIEF,
+		    RECIPE_CONTENT,
+		    RECIPE_IMAGE,
+		    RECIPE_VIDEO,
+		    YB_USER_ID,
+		    CREATE_TIME,
+		    UPDATE_TIME,
+		    RECIPE_PRICE,
+		    DEGREE,
+		    TIME_RANGE,
+		    RECIPE_STATUS,
+		    E_MALL_URL
+		FROM
+		    YB_T_RECIPE
+		WHERE RECIPE_ID = #{recipe_id} and RECIPE_STATUS = 1 and DR = 0
+    </select>
+
+	<!-- 查询我发布的菜谱 -->
+    <select id="getMyList" resultMap ="myListMap">
+        <include refid="selectMyListSql"></include>
+		<where>
+			r.YB_USER_ID=#{yb_user_id}
+			<![CDATA[
+				and r.RECIPE_STATUS < 2
+			]]> 
+			and r.DR = 0 
+			<if test="0 != create_time">
+				<![CDATA[
+					and r.CREATE_TIME < #{create_time}
+				]]> 
+			</if>
+		</where>
+		 order by r.CREATE_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询我发布的菜谱总数 -->
+    <select id="getMyTotal" resultType="int">
+   	 	select count(*) from YB_T_RECIPE
+		<where>
+			YB_USER_ID=#{yb_user_id}
+			<![CDATA[
+				and RECIPE_STATUS < 2
+			]]> 
+			and DR = 0 
+		</where>
+    </select>
+
+	<!-- 查询我认证失败的菜谱列表 -->
+    <select id="getMyFailList" resultType="com.xinlianfeng.yibaker.common.entity.RecipeBriefInfo">
+     	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_IMAGE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM YB_T_RECIPE r
+		left join YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+		<where>
+			<if test="0 != yb_user_id">
+				r.YB_USER_ID = #{yb_user_id}
+			</if>
+			and r.RECIPE_STATUS = 2
+			and r.DR = 0 
+		</where>
+		 order by r.RECIPE_ID desc limit #{limit}
+    </select>
+
+	<!-- 逻辑删除我认证失败的菜谱，食材等表中会有冗余数据 -->
+    <update id="deleteMyFailRecipe" >
+        update YB_T_RECIPE set DR = 1
+		<where>
+			YB_USER_ID = #{yb_user_id}
+			and RECIPE_ID = #{recipe_id}
+			and RECIPE_STATUS = 2
+			and DR = 0 
+		</where>
+    </update>
+
+	<!-- 查询她发布的菜谱 -->
+    <select id="getOtherList" resultMap ="myListMap">
+        <include refid="selectMyListSql"></include>
+		<where>
+			r.YB_USER_ID=#{yb_user_id}
+			and RECIPE_STATUS = 1
+			and r.DR = 0
+			<if test="0 != create_time">
+				<![CDATA[
+					and r.CREATE_TIME < #{create_time}
+				]]> 
+			</if>
+		</where>
+		 order by r.CREATE_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询她发布的菜谱总数 -->
+    <select id="getOtherListTotal" resultType="int">
+   	 	select count(*) from YB_T_RECIPE where YB_USER_ID = #{yb_user_id} and RECIPE_STATUS = 1 and DR = 0
+    </select>
+
+	<!-- 查询我收藏的菜谱 -->
+    <select id="getMyCollectList" resultMap ="otherListMap">
+        <include refid="selectOtherListSql"></include>
+		<where>
+			rs.YB_USER_ID=#{yb_user_id}
+			and rs.IS_COLLECT = 1 
+			and r.DR = 0 
+			and r.RECIPE_STATUS = 1
+			<if test="0 != collect_time">
+				<![CDATA[
+					and rs.COLLECT_TIME < #{collect_time}
+				]]> 
+			</if>
+		</where>
+		 order by rs.COLLECT_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询我收藏的菜谱总数 -->
+    <select id="getMyCollectTotal" resultType="int">
+   	 	select count(*) from YB_T_SNS_RECIPE rs
+		LEFT JOIN
+			YB_T_RECIPE r on rs.RECIPE_ID = r.RECIPE_ID
+		where 
+			rs.YB_USER_ID = #{yb_user_id} 
+			and rs.IS_COLLECT = 1
+			and r.DR = 0 
+			and r.RECIPE_STATUS = 1
+    </select>
+
+	<!-- 查询我下载的菜谱 -->
+    <select id="getMyDownLoadList" resultMap ="otherListMap">
+        <include refid="selectOtherListSql"></include>
+		<where>
+			rs.YB_USER_ID=#{yb_user_id}
+			and rs.IS_DOWNLOAD = 1 
+			and r.DR = 0 
+ 			and r.RECIPE_STATUS = 1
+			<if test="0 != download_time">
+				<![CDATA[
+					and rs.DOWNLOAD_TIME < #{download_time}
+				]]> 
+			</if>
+		</where>
+		 order by rs.DOWNLOAD_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询我下载的菜谱总数 -->
+    <select id="getMyDownLoadTotal" resultType="int">
+   	 	select count(*) from YB_T_SNS_RECIPE rs
+		LEFT JOIN
+			YB_T_RECIPE r on rs.RECIPE_ID = r.RECIPE_ID
+		where 
+			rs.YB_USER_ID = #{yb_user_id} 
+			and rs.IS_DOWNLOAD = 1
+			and r.DR = 0 
+ 			and r.RECIPE_STATUS = 1
+    </select>
+    
+    <!-- 查询我的自选菜谱 -->
+    <select id="getOptionalList" resultMap="otherListMap">
+         <include refid="selectOptionalListSql"></include>
+         <where>
+         	rs.YB_USER_ID=#{yb_user_id}
+			and rs.IS_DOWNLOAD = 1 
+			and r.DR = 0 
+ 			and r.RECIPE_STATUS = 1
+ 			and rc.DEVICE_TYPE=#{device_type}
+			<if test="0 != download_time">
+				<![CDATA[
+					and rs.DOWNLOAD_TIME < #{download_time}
+				]]> 
+			</if>
+         </where>
+         order by rs.DOWNLOAD_TIME desc limit #{limit}
+    </select>
+    <!-- 查询我的自选菜谱总数 -->
+    <select id="getOptionalTotal" resultType="int">
+    	select count(*) from YB_T_SNS_RECIPE rs
+		LEFT JOIN
+			YB_T_RECIPE r on rs.RECIPE_ID = r.RECIPE_ID
+	    LEFT JOIN
+	        YB_T_RECIPE_CURVE rc on rs.RECIPE_ID=rc.RECIPE_ID
+		where 
+			rs.YB_USER_ID = #{yb_user_id} 
+			and rs.IS_DOWNLOAD = 1
+			and r.DR = 0 
+ 			and r.RECIPE_STATUS = 1
+ 			and rc.DEVICE_TYPE=#{device_type}
+    </select>
+
+	<!-- 搜索菜谱 -->
+    <select id="searchList" resultMap ="searchListMap">
+        <include refid="selectSearchListSql"></include>
+		<where>
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+			and r.RECIPE_ID in
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+ 				#{item}  
+			</foreach>
+		</where>
+		ORDER BY FIELD
+			<foreach item="item" index="index" collection="ids" open="(r.RECIPE_ID, " separator="," close=")">  
+ 				#{item}  
+			</foreach>
+    </select>
+	<!-- 搜索的菜谱总数 -->
+	    <select id="filterIds" resultType="long">
+	   	 	select r.RECIPE_ID  from YB_T_RECIPE r
+			<where>
+				r.RECIPE_ID  IN
+			   	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+	 				#{item}  
+				</foreach>
+				and r.RECIPE_STATUS = 1 
+				and r.DR = 0
+			</where>
+	    </select>
+	    
+	    
+	<!-- 搜索菜谱 3.0 -->
+    <select id="searchList3" resultMap ="searchListMap">
+        <include refid="selectSearchListSql"></include>
+		<where>
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+			and r.RECIPE_TYPE = 1
+			and re.RECIPE_MANUID = 201
+			and r.RECIPE_ID in
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+ 				#{item}  
+			</foreach>
+		</where>
+		ORDER BY FIELD
+			<foreach item="item" index="index" collection="ids" open="(r.RECIPE_ID, " separator="," close=")">  
+ 				#{item}  
+			</foreach>
+    </select>
+    
+	<!-- 搜索的菜谱总数  3.0-->
+    <select id="filterIds3" resultType="long">
+   	 	select r.RECIPE_ID  from YB_T_RECIPE r
+   	 	LEFT JOIN YB_T_RECIPE_EXT ext ON ext.RECIPE_ID = r.RECIPE_ID
+		<where>
+			r.RECIPE_ID  IN
+		   	<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">  
+ 				#{item}  
+			</foreach>
+			AND r.RECIPE_STATUS = 1
+			AND r.DR = 0
+			AND r.RECIPE_TYPE = 1
+			AND ext.RECIPE_MANUID = 201
+		</where>
+    </select>
+	
+    
+    <!-- 加载全部菜谱 -->
+    <select id="getSearchAll" resultMap="recipeResultMap">
+        SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL
+		FROM
+		    YB_T_RECIPE r
+    </select>
+      <!-- 根据条件加载数据  3.0接口
+      		条件
+      		.只加载未被逻辑删除
+      		.菜谱厂商为 201 既 一焙的食谱
+      		.带有曲线
+       -->
+    <select id="getSearch" resultMap="recipeResultMap">
+	    SELECT  
+			    r.RECIPE_ID,
+			    r.RECIPE_NAME,
+			    r.RECIPE_TYPE,
+			    r.KEYWORD,
+			    r.RECIPE_BRIEF,
+			    r.RECIPE_CONTENT,
+			    r.RECIPE_IMAGE,
+			    r.RECIPE_VIDEO,
+			    r.YB_USER_ID,
+			    r.CREATE_TIME,
+			    r.UPDATE_TIME,
+			    r.RECIPE_PRICE,
+			    r.DEGREE,
+			    r.TIME_RANGE,
+			    r.RECIPE_STATUS,
+			    r.E_MALL_URL
+			FROM
+			    YB_T_RECIPE r
+			LEFT JOIN YB_T_RECIPE_EXT ext ON ext.RECIPE_ID = r.RECIPE_ID
+				WHERE r.RECIPE_TYPE = 1 
+				AND r.DR = 0
+				AND ext.RECIPE_MANUID = 201
+    </select>
+	<!-- 查询菜谱详情sql -->
+     <sql id="selectRecipeDetailSql">
+    	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    tp.TIP_ID,
+		    tp.RECIPE_ID,
+		    tp.TIP_CONTENT,
+		    ig.INGREDIENT_ID,
+		    ig.RECIPE_ID,
+		    ig.INGREDIENT_NAME,
+		    ig.INGREDIENT_QUANTITY,
+		    ig.E_MALL_URL,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE r
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+				LEFT JOIN
+			YB_T_RECIPE_TIPS tp on r.RECIPE_ID = tp.RECIPE_ID
+				LEFT JOIN
+			YB_T_RECIPE_INGREDIENTS ig on r.RECIPE_ID = ig.RECIPE_ID
+				 LEFT JOIN
+			YB_T_RECIPE_EXT re on re.RECIPE_ID=r.RECIPE_ID
+    </sql>
+
+	<!-- 查询菜谱执行数据sql -->
+     <sql id="selectRecipeDataSql">
+    	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rc.CURVE_ID,
+		    rc.RECIPE_ID,
+		    rc.DEVICE_TYPE,
+		    rc.CURVE_CONTENT,
+		    tp.TIP_ID,
+		    tp.RECIPE_ID,
+		    tp.TIP_CONTENT,
+		    ig.INGREDIENT_ID,
+		    ig.RECIPE_ID,
+		    ig.INGREDIENT_NAME,
+		    ig.INGREDIENT_QUANTITY,
+		    ig.E_MALL_URL
+		FROM
+		    YB_T_RECIPE r
+				LEFT JOIN
+			YB_T_RECIPE_CURVE rc on r.RECIPE_ID = rc.RECIPE_ID
+				LEFT JOIN
+			YB_T_RECIPE_TIPS tp on r.RECIPE_ID = tp.RECIPE_ID
+				LEFT JOIN
+			YB_T_RECIPE_INGREDIENTS ig on r.RECIPE_ID = ig.RECIPE_ID
+    </sql>
+
+	<!-- 查询我发布的菜谱sql -->
+    <sql id="selectMyListSql">
+     	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT
+		FROM
+		    YB_T_RECIPE r
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+    </sql>
+
+	<!-- 查询我收藏/下载的菜谱sql -->
+    <sql id="selectOtherListSql">
+     	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    rs.COLLECT_TIME,
+		    rs.LIKE_TIME,
+		    rs.DOWNLOAD_TIME,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_SNS_RECIPE rs
+				LEFT JOIN
+			YB_T_RECIPE r on rs.RECIPE_ID = r.RECIPE_ID
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+			    LEFT JOIN
+			YB_T_RECIPE_EXT re on re.RECIPE_ID=r.RECIPE_ID
+			
+    </sql>
+    
+    <!-- 查询我的自选菜谱sql -->
+    <sql id="selectOptionalListSql">
+    	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    rs.COLLECT_TIME,
+		    rs.LIKE_TIME,
+		    rs.DOWNLOAD_TIME,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_SNS_RECIPE rs
+				LEFT JOIN
+			YB_T_RECIPE r on rs.RECIPE_ID = r.RECIPE_ID
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+			    LEFT JOIN
+			YB_T_RECIPE_EXT re on re.RECIPE_ID=rs.RECIPE_ID
+			    LEFT JOIN
+			YB_T_RECIPE_CURVE rc on rc.RECIPE_ID=rs.RECIPE_ID
+    </sql>
+    
+    
+	<!-- 搜索菜谱列表sql -->
+    <sql id="selectSearchListSql">
+     	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE r
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+				LEFT JOIN
+			YB_T_RECIPE_EXT re on re.RECIPE_ID=r.RECIPE_ID
+    </sql>
+    
+    <select id="findRecipeSellInfo" resultType="com.xinlianfeng.yibaker.common.entity.RecipeSellInfo">
+    	select r.RECIPE_ID,r.RECIPE_NAME,r.RECIPE_IMAGE,ifnull(r.RECIPE_PRICE, 0) RECIPE_PRICE,r.YB_USER_ID,ui.NICKNAME 
+    		from YB_T_RECIPE r 
+    		left join YB_T_USER_INFO ui on ui.YB_USER_ID = r.YB_USER_ID
+    	 	where RECIPE_ID = #{recipe_id} and RECIPE_STATUS = 1 and DR = 0
+    </select>
+    
+    <insert id="createRecipeExt">
+    	insert into
+    	YB_T_RECIPE_EXT(
+    	   RECIPE_ID,
+    	   RECIPE_NO,
+    	   RECIPE_MANUID)
+    	values(
+    	#{recipe_id},
+    	#{recipe_no},
+    	#{recipe_manuid})   	
+    </insert>
+
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeIngredientDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeIngredient" id="recipeIngredientResultMap">  
+	    <result property="ingredient_id" column="INGREDIENT_ID" />  
+	    <result property="recipe_id" column="RECIPE_ID" />  
+	    <result property="ingredient_name" column="INGREDIENT_NAME" />  
+	    <result property="ingredient_quantity" column="INGREDIENT_QUANTITY" />  
+	    <result property="e_mall_url" column="E_MALL_URL" />  
+	</resultMap>  
+
+	<insert id="createRecipeIngredient" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeIngredient"  useGeneratedKeys="true" keyProperty="ingredient_id">
+		insert into
+		YB_T_RECIPE_INGREDIENTS (
+		RECIPE_ID, 
+		INGREDIENT_NAME, 
+		INGREDIENT_QUANTITY)
+		values (
+		#{recipe_id}, 
+		#{ingredient_name},
+		#{ingredient_quantity})
+	</insert>
+
+	<!-- 获取所有食材信息 -->
+	<select id="getRecipeIngredientAll" resultMap="recipeIngredientResultMap">
+		SELECT 
+				ytri.INGREDIENT_ID,
+				ytri.RECIPE_ID,
+				ytri.INGREDIENT_NAME,
+				ytri.INGREDIENT_QUANTITY,
+				ytri.E_MALL_URL,
+				ytri.NOTE
+			FROM
+			YB_T_RECIPE_INGREDIENTS ytri
+			LEFT JOIN YB_T_RECIPE recipe ON recipe.RECIPE_ID = ytri.RECIPE_ID
+			WHERE recipe.RECIPE_TYPE = 1 ;
+	</select>
+	<!-- 3.0 获取相关食材信息 -->
+	<select id="getRecipeIngredient" resultMap="recipeIngredientResultMap">
+		SELECT 
+			ytri.INGREDIENT_ID,
+			ytri.RECIPE_ID,
+			ytri.INGREDIENT_NAME,
+			ytri.INGREDIENT_QUANTITY,
+			ytri.E_MALL_URL,
+			ytri.NOTE
+		FROM
+		YB_T_RECIPE_INGREDIENTS ytri
+		LEFT JOIN YB_T_RECIPE recipe ON recipe.RECIPE_ID = ytri.RECIPE_ID
+		LEFT JOIN YB_T_RECIPE_EXT ext ON ext.RECIPE_ID = ytri.RECIPE_ID
+		WHERE 
+			recipe.RECIPE_TYPE = 1
+			AND recipe.DR = 0
+			AND ext.RECIPE_MANUID = 201
+	</select>
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeWorkDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeWork" id="workResultMap">  
+	    <id property="work_id" column="WORK_ID" />  
+	    <result property="recipe_id" column="RECIPE_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="work_image" column="WORK_IMAGE" />  
+	    <result property="work_content" column="WORK_CONTENT" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	</resultMap>  
+
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.WorkDetailResp" id="workDetailResultMap">
+		<association property="work" resultMap="workResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSWorkDao.workSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeBriefInfoResultMap"/>
+	</resultMap>
+
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.WorkDetailResp" id="workOneResultMap" >
+		<association property="work" resultMap="workResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSWorkDao.workSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="mysns" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSWorkDao.snsMyWorkResultMap"/>
+	</resultMap>
+
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.WorkListResp" id="workListMap" >
+		<collection  property="worklist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.WorkDetailResp" resultMap="workOneResultMap"/>
+	</resultMap>
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeWork"  useGeneratedKeys="true" keyProperty="work_id">
+		insert into
+		YB_T_RECIPE_WORK (
+		RECIPE_ID, 
+		YB_USER_ID, 
+		WORK_IMAGE, 
+		WORK_CONTENT, 
+		CREATE_TIME)
+		values (
+		#{recipe_id}, 
+		#{yb_user_id},
+		#{work_image}, 
+		#{work_content}, 
+		#{create_time})
+	</insert>
+
+     <select id="getWorkDetail" resultMap ="workDetailResultMap">
+    	<include refid="selectWorkDetailSql"></include>
+    	<where> w.WORK_ID = #{work_id} and w.DR = 0</where>
+    </select>
+ 
+ 	<!-- 查询作品信息 -->
+     <select id="getWorkInfo" resultMap ="workResultMap">
+        <include refid="selectRecipeWorkSql"></include>
+		WHERE WORK_ID = #{work_id}
+    </select>
+
+    <select id="getList" resultMap ="workListMap">
+        <include refid="selectWorkListSql"></include>
+		<where>
+			w.DR = 0
+			<if test="0 != to_user_id">
+				and w.YB_USER_ID=#{to_user_id}
+			</if>
+			<if test="0 != recipe_id">
+				and w.RECIPE_ID=#{recipe_id}
+			</if>
+			<if test="0 != work_id">
+				<![CDATA[
+					and w.WORK_ID < #{work_id}
+				]]> 
+			</if>
+		</where>
+		 order by CREATE_TIME desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_RECIPE_WORK
+		<where>
+			DR = 0
+			<if test="0 != yb_user_id">
+				and YB_USER_ID=#{yb_user_id}
+			</if>
+			<if test="0 != recipe_id">
+				and RECIPE_ID=#{recipe_id}
+			</if>
+		</where>
+    </select>
+
+   <sql id="selectRecipeWorkSql">
+    	SELECT 
+		    WORK_ID,
+		    RECIPE_ID,
+		    YB_USER_ID,
+		    WORK_IMAGE,
+		    WORK_CONTENT,
+		    CREATE_TIME
+		FROM
+		    YB_T_RECIPE_WORK
+    </sql>
+
+    <sql id="selectWorkListSql">
+    	SELECT  
+		    w.WORK_ID,
+		    w.RECIPE_ID,
+		    w.YB_USER_ID,
+		    w.WORK_IMAGE,
+		    w.WORK_CONTENT,
+		    w.CREATE_TIME,
+		    ifnull(ws.LIKE_COUNT, 0) LIKE_COUNT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+			ifnull(IS_LIKE, 0) IS_LIKE		    
+		FROM
+		    YB_T_RECIPE_WORK w
+		    	RIGHT JOIN
+		    (select RECIPE_ID from YB_T_RECIPE where RECIPE_STATUS = 1 and DR = 0) r on w.RECIPE_ID = r.RECIPE_ID
+		        LEFT JOIN
+			(select WORK_ID, ifnull(sum(IS_LIKE), 0) LIKE_COUNT from YB_T_SNS_WORK group by WORK_ID) ws on w.WORK_ID = ws.WORK_ID
+				LEFT JOIN
+     		(select WORK_ID, IS_LIKE from YB_T_SNS_WORK  where  YB_USER_ID = #{yb_user_id}) sw on w.WORK_ID = sw.WORK_ID
+				LEFT JOIN
+			YB_T_USER_INFO u on w.YB_USER_ID = u.YB_USER_ID
+    </sql>
+
+    <sql id="selectWorkDetailSql">
+    	SELECT  
+		    w.WORK_ID,
+		    w.RECIPE_ID,
+		    w.YB_USER_ID,
+		    w.WORK_IMAGE,
+		    w.WORK_CONTENT,
+		    w.CREATE_TIME,
+		    ws.LIKE_COUNT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_IMAGE,
+		    r.DEGREE,
+		    r.TIME_RANGE
+		FROM
+		    YB_T_RECIPE_WORK w
+		        LEFT JOIN
+			(select WORK_ID, sum(IS_LIKE) LIKE_COUNT from YB_T_SNS_WORK group by WORK_ID) ws on w.WORK_ID = ws.WORK_ID
+				LEFT JOIN
+			YB_T_USER_INFO u on w.YB_USER_ID = u.YB_USER_ID
+				LEFT JOIN
+			YB_T_RECIPE r on w.RECIPE_ID = r.RECIPE_ID
+    </sql>
+
+</mapper>

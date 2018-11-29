@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSSubjectDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SubjectSNSCount" id="subjectSNSCountResultMap">  
+	    <id property="reply_count" column="REPLY_COUNT" />
+	    <id property="like_count" column="LIKE_COUNT" />  
+	</resultMap>  
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSMySubject" id="snsMySubjectResultMap">  
+	    <result property="is_like" column="IS_LIKE" />  
+	</resultMap>  
+
+	<insert id="insertUpdateLike" parameterType="com.xinlianfeng.yibaker.common.req.LikeSubjectReq" >
+		insert into
+		YB_T_SNS_SUBJECT (
+		SUBJECT_ID,
+		YB_USER_ID,
+		IS_LIKE,
+		LIKE_TIME)
+		values (
+		#{subject_id}, 
+		#{yb_user_id},
+		#{is_like},
+		#{like_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_LIKE=#{is_like},
+		LIKE_TIME=#{like_time}
+	</insert>
+
+   <select id="getLikeList" resultType="com.xinlianfeng.yibaker.common.resp.OpDetailResp">
+        <include refid="selectLikeListSql"></include>
+		<where>
+			<if test="0 != subject_id">
+				ws.SUBJECT_ID = #{subject_id}
+			</if>
+			<if test="0 != like_time">
+				<![CDATA[
+					and ws.LIKE_TIME < #{like_time}
+				]]> 
+			</if>
+			and ws.IS_LIKE = 1
+		</where>
+		 order by ws.LIKE_TIME desc limit #{limit}
+    </select>
+
+    <select id="getLikeTotal" resultType="int">
+   	 	select count(*) from YB_T_SNS_SUBJECT where SUBJECT_ID = #{subject_id} and IS_LIKE = 1
+    </select>
+
+   <sql id="selectLikeListSql">
+    	SELECT 
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    ws.IS_LIKE IS_OP,
+		    ws.LIKE_TIME OP_TIME
+		FROM
+		    YB_T_SNS_SUBJECT ws
+				LEFT JOIN
+			YB_T_USER_INFO u on ws.YB_USER_ID = u.YB_USER_ID
+    </sql>
+
+ 	<!-- 是否点赞 -->
+     <select id="getSNSMySubject"  resultType="com.xinlianfeng.yibaker.common.entity.SNSMySubject">
+     	select 
+     		ifnull(sum(IS_LIKE),0) IS_LIKE
+     	from YB_T_SNS_SUBJECT 
+     	where  YB_USER_ID = #{yb_user_id} and SUBJECT_ID = #{subject_id}
+    </select>
+
+</mapper>

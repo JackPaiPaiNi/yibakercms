@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ReportDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.Report"  useGeneratedKeys="true" keyProperty="report_id">
+		insert into
+		YB_T_REPORT (
+		FROM_USER_ID,
+		FROM_USER_NAME, 
+		FROM_IP_ADDR, 
+		REPORT_CONTENT, 
+		REPORT_TIME, 
+		REASON_TYPE, 
+		SRC_TYPE, 
+		SRC_ID, 
+		SRC_IMAGE, 
+		SRC_CONTENT)
+		values (
+		#{from_user_id}, 
+		#{from_user_name}, 
+		#{from_ip_addr}, 
+		#{report_content}, 
+		#{report_time}, 
+		#{reason_type}, 
+		#{src_type}, 
+		#{src_id}, 
+		#{src_image}, 
+		#{src_content})
+	</insert>
+
+ </mapper>

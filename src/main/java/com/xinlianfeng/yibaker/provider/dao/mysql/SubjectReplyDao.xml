@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SubjectReplyDao">
+
+	<!-- 话题评论详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SubjectReply" id="subjectReplyResultMap">  
+	    <id property="reply_id" column="REPLY_ID" />  
+	    <result property="subject_id" column="SUBJECT_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="type_id" column="TYPE_ID" />  
+	    <result property="reply_content" column="REPLY_CONTENT" />  
+	    <result property="reply_image" column="REPLY_IMAGE" />  
+	    <result property="reply_time" column="REPLY_TIME" />  
+	    <result property="add_user_id" column="ADD_USER_ID" />  
+	    <result property="add_user_name" column="ADD_USER_NAME" />  
+	    <result property="add_reply_content" column="ADD_REPLY_CONTENT" />  
+	</resultMap>  
+
+	<!-- 话题评论所有信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.SubjectReplyResp" id="subjectReplyOneResultMap">
+		<association property="reply" resultMap="subjectReplyResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 话题评论列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.SubjectReplyListResp" id="subjectReplyListMap" >
+		<collection  property="replylist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.SubjectReplyResp" resultMap="subjectReplyOneResultMap"/>
+	</resultMap>
+
+	<!-- 创建话题评论 -->
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.SubjectReply"  useGeneratedKeys="true" keyProperty="reply_id">
+		insert into
+		YB_T_SUBJECT_REPLY (
+		SUBJECT_ID, 
+		YB_USER_ID, 
+		REPLY_CONTENT, 
+		REPLY_IMAGE, 
+		REPLY_TIME, 
+		ADD_USER_ID,
+		ADD_USER_NAME,
+		ADD_REPLY_CONTENT)
+		values (
+		#{subject_id}, 
+		#{yb_user_id},
+		#{reply_content}, 
+		#{reply_image}, 
+		#{reply_time}, 
+		#{add_user_id},
+		#{add_user_name},
+		#{add_reply_content})
+	</insert>
+
+	<!-- 查询话题评论列表 -->
+    <select id="getList" resultMap ="subjectReplyListMap">
+        <include refid="selectSubjectReplyListSql"></include>
+		<where>
+			<if test="0 != subject_id">
+				r.SUBJECT_ID=#{subject_id}
+			</if>
+			<if test="0 != yb_user_id">
+				and r.YB_USER_ID=#{yb_user_id}
+			</if>
+			<if test="0 != reply_id">
+				<![CDATA[
+					and r.REPLY_ID > #{reply_id}
+				]]> 
+			</if>
+			and r.TYPE_ID = 1 and r.DR = 0
+		</where>
+		 order by r.REPLY_ID limit #{limit}
+    </select>
+
+	<!-- 查询话题评论总数 -->
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_SUBJECT_REPLY 
+		<where>
+			<if test="0 != subject_id">
+				SUBJECT_ID=#{subject_id}
+			</if>
+			<if test="0 != yb_user_id">
+				and YB_USER_ID=#{yb_user_id}
+			</if>
+			and TYPE_ID = 1 and DR = 0
+		</where>
+    </select>
+
+	<!-- 查询话题评论列表sql -->
+    <sql id="selectSubjectReplyListSql">
+    	SELECT  
+		    r.REPLY_ID,
+		    r.SUBJECT_ID,
+		    r.YB_USER_ID,
+		    r.TYPE_ID,
+		    r.REPLY_CONTENT,
+		    r.REPLY_IMAGE,
+		    r.REPLY_TIME,
+		    r.ADD_USER_ID,
+		    r.ADD_USER_NAME,
+		    r.ADD_REPLY_CONTENT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID
+		FROM
+		    YB_T_SUBJECT_REPLY r
+				LEFT JOIN
+			YB_T_USER_INFO u on r.YB_USER_ID = u.YB_USER_ID
+    </sql>
+
+</mapper>

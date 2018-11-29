@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.WorkReplyDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.WorkReply" id="workReplyResultMap">  
+	    <id property="reply_id" column="REPLY_ID" />  
+	    <result property="work_id" column="RECIPE_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="reply_content" column="REPLY_CONTENT" />  
+	    <result property="reply_time" column="REPLY_TIME" />  
+	    <result property="add_user_id" column="ADD_USER_ID" />  
+	    <result property="add_user_name" column="ADD_USER_NAME" />  
+	    <result property="add_reply_content" column="ADD_REPLY_CONTENT" />  
+	</resultMap>  
+
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.WorkReplyResp" id="workReplyOneResultMap" >
+		<association property="reply" resultMap="workReplyResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSWorkReplyDao.workReplySNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.WorkReplyListResp" id="workReplyListMap" >
+		<collection  property="replylist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.WorkReplyResp" resultMap="workReplyOneResultMap"/>
+	</resultMap>
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.WorkReply"  useGeneratedKeys="true" keyProperty="reply_id">
+		insert into
+		YB_T_WORK_REPLY (
+		WORK_ID, 
+		YB_USER_ID, 
+		REPLY_CONTENT, 
+		REPLY_TIME, 
+		ADD_USER_ID,
+		ADD_USER_NAME,
+		ADD_REPLY_CONTENT)
+		values (
+		#{work_id}, 
+		#{yb_user_id},
+		#{reply_content}, 
+		#{reply_time}, 
+		#{add_user_id},
+		#{add_user_name},
+		#{add_reply_content})
+	</insert>
+
+    <select id="getList" resultMap ="workReplyListMap">
+        <include refid="selectWorkReplyListSql"></include>
+		<where>
+			r.DR = 0
+			<if test="0 != work_id">
+				and r.WORK_ID=#{work_id}
+			</if>
+			<if test="0 != reply_id">
+				<![CDATA[
+					and r.REPLY_ID < #{reply_id}
+				]]> 
+			</if>
+		</where>
+		 order by r.REPLY_TIME desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_WORK_REPLY where WORK_ID = #{work_id} and DR = 0
+    </select>
+
+   <sql id="selectWorkReplySql">
+    	SELECT 
+		    REPLY_ID,
+		    WORK_ID,
+		    YB_USER_ID,
+		    REPLY_CONTENT,
+		    REPLY_TIME,
+		    ADD_USER_ID,
+		    ADD_USER_NAME,
+		    ADD_REPLY_CONTENT
+		FROM
+		    YB_T_WORK_REPLY
+    </sql>
+
+    <sql id="selectWorkReplyListSql">
+    	SELECT  
+		    r.REPLY_ID,
+		    r.WORK_ID,
+		    r.YB_USER_ID,
+		    r.REPLY_CONTENT,
+		    r.REPLY_TIME,
+		    r.ADD_USER_ID,
+		    r.ADD_USER_NAME,
+		    r.ADD_REPLY_CONTENT,
+		    rs.LIKE_COUNT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID
+		FROM
+		    YB_T_WORK_REPLY r
+		        LEFT JOIN
+			(select W_REPLY_ID, sum(IS_LIKE) LIKE_COUNT from YB_T_SNS_WORK_REPLY group by W_REPLY_ID) rs on r.REPLY_ID = rs.W_REPLY_ID
+				LEFT JOIN
+			YB_T_USER_INFO u on r.YB_USER_ID = u.YB_USER_ID
+    </sql>
+
+</mapper>

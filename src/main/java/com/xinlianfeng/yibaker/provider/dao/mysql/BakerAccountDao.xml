@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.BakerAccountDao">
+
+   <insert id="createBakerAccount" parameterType="com.xinlianfeng.yibaker.common.entity.BakerAccount" useGeneratedKeys="true" keyProperty="ba_id">
+   	insert into YB_T_BAKER_ACCOUNT (YB_USER_ID, ACCUM_INCOME, ACCUM_OUTLAY, BALANCE, CREATE_TIME, UPDATE_TIME, FROZEN)  values 
+		(#{yb_user_id}, #{accum_income}, #{accum_outlay}, #{balance}, #{create_time}, #{update_time}, #{frozen})
+   </insert> 
+   
+   <update id="updateBakerAccount" parameterType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+   	update 	YB_T_BAKER_ACCOUNT ba, YB_T_INCOME_STATE inst
+   	<set>
+   		<if test="inst_type==0">
+   			ba.ACCUM_INCOME=ba.ACCUM_INCOME+inst.INST_DELTA,
+   		</if>
+   		<if test="inst_type==1">
+   			ba.ACCUM_OUTLAY=ba.ACCUM_OUTLAY+abs(inst.INST_DELTA),
+   		</if>
+   		 ba.BALANCE=inst.INST_POST_BALANCE, ba.UPDATE_TIME= inst.INST_TIME
+   	</set>
+			where ba.BA_ID = inst.INST_ACCOUNT_ID and inst.INST_ACCOUNT_ID = #{inst_account_id} and inst.INST_ID = #{inst_id}
+   </update>
+   
+   <select id="findOne" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.BakerAccount">
+   	select BA_ID, YB_USER_ID, ACCUM_INCOME, ACCUM_OUTLAY, BALANCE, CREATE_TIME, UPDATE_TIME, FROZEN 
+   		from YB_T_BAKER_ACCOUNT 
+   		where YB_USER_ID = #{yb_user_id}
+   </select>
+
+   <select id="findOneByPKForUpdate" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.BakerAccount">
+    	select    
+    		BA_ID, YB_USER_ID, ACCUM_INCOME, ACCUM_OUTLAY, BALANCE, CREATE_TIME, 
+    		UPDATE_TIME, FROZEN, NOTE  
+			from YB_T_BAKER_ACCOUNT 
+			where  BA_ID = #{ba_id}  for update 
+    </select>
+
+</mapper>

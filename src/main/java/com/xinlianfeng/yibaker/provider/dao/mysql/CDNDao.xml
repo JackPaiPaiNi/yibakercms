@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.CDNDao">
+
+    <select id="getInfo" parameterType="string" resultType="com.xinlianfeng.yibaker.common.entity.CDN">
+       <include refid="selectCDNSql"></include>
+		<where>
+			 CDN_ID = #{cdn_id} and CDN_STATUS = 1
+		</where>
+    </select>
+
+    <sql id="selectCDNSql">
+    	SELECT 
+		    CDN_ID,
+		    CDN_NAME,
+		    CDN_STATUS,
+		    DOMAIN,
+		    IPADDR,
+		    DEVICE_PORT,
+		    PHONE_PORT
+		FROM
+		    YB_T_CDN
+    </sql>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeProcessDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeProcess" id="recipeProcessResultMap">  
+	    <result property="process_id" column="PROCESS_ID" />  
+	    <result property="recipe_id" column="RECIPE_ID" />  
+	    <result property="process_content" column="PROCESS_CONTENT" />  
+	    <result property="image_path" column="IMAGE_PATH" />  
+	    <result property="video_path" column="VIDEO_PATH" />  
+	    <result property="process_sort" column="PROCESS_SORT" />  
+	</resultMap>  
+
+	<insert id="createRecipeProcess" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeProcess"  useGeneratedKeys="true" keyProperty="process_id">
+		insert into
+		YB_T_RECIPE_PROCESS (
+		RECIPE_ID, 
+		PROCESS_CONTENT, 
+		IMAGE_PATH, 
+		VIDEO_PATH, 
+		PROCESS_SORT)
+		values (
+		#{recipe_id}, 
+		#{process_content},
+		#{image_path}, 
+		#{video_path}, 
+		#{process_sort})
+	</insert>
+
+	<select id="getRecipeProcessList" parameterType="long" resultMap="recipeProcessResultMap">  
+     	SELECT   
+		    pc.PROCESS_ID,
+		    pc.RECIPE_ID,
+		    pc.PROCESS_CONTENT,
+		    pc.IMAGE_PATH,
+		    pc.VIDEO_PATH,
+		    pc.PROCESS_SORT
+    	FROM YB_T_RECIPE_PROCESS pc where pc.RECIPE_ID = #{recipe_id}
+	</select>  
+
+</mapper>

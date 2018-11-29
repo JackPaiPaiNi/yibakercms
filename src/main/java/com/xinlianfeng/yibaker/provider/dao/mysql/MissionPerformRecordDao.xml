@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.MissionPerformRecordDao">
+
+   <insert id="createMissionPerformRecord" parameterType="com.xinlianfeng.yibaker.common.entity.MissionPerformRecord" useGeneratedKeys="true" keyProperty="mpr_id">
+   	insert into YB_T_MISSION_PERFORM_RECORD ( PERFORM_USER_ID, PERFORM_USER_NAME, PERFORM_MISSION_ID, PERFORM_MISSION_NAME, PERFORM_TIME, PERFORM_RESULT, EARN_COUNT) values 
+		( #{perform_user_id}, #{perform_user_name}, #{perform_mission_id}, #{perform_mission_name}, #{perform_time}, #{perform_result}, #{earn_count})
+   </insert> 
+
+	<select id="findOnceMissionPerformRecord" resultType="com.xinlianfeng.yibaker.common.entity.MissionPerformRecord" >
+		select PERFORM_USER_ID, PERFORM_USER_NAME, PERFORM_MISSION_ID, PERFORM_MISSION_NAME, PERFORM_TIME, PERFORM_RESULT 
+			from YB_T_MISSION_PERFORM_RECORD 
+			where PERFORM_USER_ID = #{perform_user_id} and PERFORM_MISSION_ID = #{perform_mission_id}
+	</select>
+	
+	<select id="findDailyMissionPerformRecord" resultType="com.xinlianfeng.yibaker.common.entity.MissionPerformRecord" >
+		select PERFORM_USER_ID, PERFORM_USER_NAME, PERFORM_MISSION_ID, PERFORM_MISSION_NAME, PERFORM_TIME, PERFORM_RESULT 
+			from YB_T_MISSION_PERFORM_RECORD 
+			where 
+				PERFORM_USER_ID = #{perform_user_id} and PERFORM_MISSION_ID = #{perform_mission_id} and from_unixtime(PERFORM_TIME/1000, '%Y-%m-%d') = curdate() 
+			
+	</select>
+	
+	<select id="findDailyMissionPerformRecordCnt" resultType="int" >
+		select count(1)
+			from YB_T_MISSION_PERFORM_RECORD 
+			where 
+				PERFORM_USER_ID = #{perform_user_id} and PERFORM_MISSION_ID = #{perform_mission_id} and from_unixtime(PERFORM_TIME/1000, '%Y-%m-%d') = curdate() 
+			
+	</select>
+	
+	<select id="findDailySigninRecord"  resultType="com.xinlianfeng.yibaker.common.entity.MissionPerformRecord" >
+		select PERFORM_USER_ID, PERFORM_USER_NAME, PERFORM_MISSION_ID, PERFORM_MISSION_NAME, PERFORM_TIME, PERFORM_RESULT 
+			from YB_T_MISSION_PERFORM_RECORD 
+			where 
+			<!--
+			   	PERFORM_USER_ID = #{perform_user_id} and PERFORM_MISSION_ID = 8 and from_unixtime(PERFORM_TIME/1000, '%Y-%m-%d %H:%i')= date_format(SUBTIME(now(), '0:${beforedays}:0.0'), '%Y-%m-%d %H:%i') limit 1
+			    -->
+				PERFORM_USER_ID = #{perform_user_id} and PERFORM_MISSION_ID = 8 and from_unixtime(PERFORM_TIME/1000, '%Y-%m-%d') = DATE_SUB(curdate(), INTERVAL #{beforedays} DAY) limit 1
+			  
+	</select>
+</mapper>

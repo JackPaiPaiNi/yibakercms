@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserExpertDao">
+
+	<!-- 查询烘焙达人列表-->
+     <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.UserBriefInfo">
+     	SELECT  
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID
+		FROM
+		    YB_T_USER_EXPERT ue
+				LEFT JOIN
+			YB_T_USER_INFO ui on ue.YB_USER_ID = ui.YB_USER_ID
+		WHERE ue.DR = 0 and ue.ORD_NUM > 0 ORDER BY ue.ORD_NUM LIMIT #{limit}
+		    	
+    </select>
+
+</mapper>

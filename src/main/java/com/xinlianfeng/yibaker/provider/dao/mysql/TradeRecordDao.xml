@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.TradeRecordDao">
+
+	<insert id="createTradeRecord" parameterType="com.xinlianfeng.yibaker.common.entity.TradeRecord"  useGeneratedKeys="true" keyProperty="tr_id">
+		insert into YB_T_TRADE_RECORD (TR_TYPE,TR_SRC_ID,TR_SRC_NAME,TR_SRC_IMAGE,TR_SRC_PRICE,TR_QUANTITY,TR_TOTAL,SELL_USER_ID,SELL_USER_NAME,BUY_USER_ID,BUY_USER_NAME,TR_TIME) 
+			values (#{tr_type},#{tr_src_id},#{tr_src_name},#{tr_src_image},#{tr_src_price},#{tr_quantity},#{tr_total},#{sell_user_id},#{sell_user_name},#{buy_user_id},#{buy_user_name},#{tr_time}
+			)
+	</insert>
+	
+	<select id="findBuyRecord" parameterType="com.xinlianfeng.yibaker.common.entity.TradeRecord" resultType="com.xinlianfeng.yibaker.common.entity.TradeRecord">
+		select TR_ID,TR_TYPE,TR_SRC_ID,TR_SRC_NAME,TR_SRC_IMAGE,TR_SRC_PRICE,TR_QUANTITY,TR_TOTAL,SELL_USER_ID,SELL_USER_NAME,BUY_USER_ID,BUY_USER_NAME,TR_TIME
+			from YB_T_TRADE_RECORD 
+			where TR_TYPE = #{tr_type} and TR_SRC_ID = #{tr_src_id} and BUY_USER_ID = #{buy_user_id} limit 1
+	</select>
+
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.BindDeviceDao">
+
+	<insert id="insertUpdateBind" parameterType="com.xinlianfeng.yibaker.common.entity.BindDevice">
+		insert into
+		YB_T_DEVICE_BIND (
+		YB_USER_ID,
+		DEVICE_ID,
+		<if test="0 != device_type">
+			DEVICE_TYPE,
+		</if>
+		<if test="0 != auth_level">
+			AUTH_LEVEL,
+		</if>
+		DEVICE_NAME,
+		BIND_STATUS,
+		BIND_TIME,
+		BIND_WIFI)
+		values (
+		#{yb_user_id}, 
+		#{device_id},
+		<if test="0 != device_type">
+			#{device_type}, 
+		</if>
+		<if test="0 != auth_level">
+			#{auth_level}, 
+		</if>
+		#{device_name},
+		#{bind_status},
+		#{bind_time},
+		#{bind_wifi}) 
+		ON DUPLICATE KEY UPDATE
+		<if test="0 != auth_level">
+			AUTH_LEVEL=#{auth_level},
+		</if>
+		DEVICE_NAME=#{device_name},
+		BIND_STATUS=#{bind_status},
+		BIND_TIME=#{bind_time},
+		BIND_WIFI=#{bind_wifi}
+	</insert>
+
+    <update id="updateUnbind"  parameterType="com.xinlianfeng.yibaker.common.entity.BindDevice">
+        update YB_T_DEVICE_BIND set BIND_STATUS = 0 where YB_USER_ID = #{yb_user_id} and DEVICE_ID = #{device_id}
+    </update>
+
+    <update id="updateUnbindAll"  parameterType="com.xinlianfeng.yibaker.common.entity.BindDevice">
+        update YB_T_DEVICE_BIND set BIND_STATUS = 0 where DEVICE_ID = #{device_id} and BIND_STATUS = 1
+    </update>
+
+    <select id="checkBindWifi"  parameterType="com.xinlianfeng.yibaker.common.entity.BindDevice" resultType="int">
+   	 	select count(*) from YB_T_DEVICE_BIND where 
+   	 	YB_USER_ID = #{yb_user_id} 
+   	 	and DEVICE_ID = #{device_id} 
+   	 	and BIND_WIFI = #{bind_wifi}
+    </select>
+
+   <update id="updateDeviceName"  parameterType="com.xinlianfeng.yibaker.common.entity.BindDevice">
+        update YB_T_DEVICE_BIND set DEVICE_NAME = #{device_name} where YB_USER_ID = #{yb_user_id} and DEVICE_ID = #{device_id}
+    </update>
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.BindDevice">
+        <include refid="selectBindDeviceSql"></include>
+		<where>
+			<if test="0 != yb_user_id">
+				YB_USER_ID = #{yb_user_id}
+			</if>
+			<if test="0 != bind_id">
+				<![CDATA[
+					and BIND_ID < #{bind_id}
+				]]> 
+			</if>
+			and BIND_STATUS = 1
+		</where>
+		 order by BIND_TIME desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_DEVICE_BIND where YB_USER_ID = #{yb_user_id} and BIND_STATUS = 1
+    </select>
+
+   <sql id="selectBindDeviceSql">
+    	SELECT 
+		    BIND_ID,
+		    YB_USER_ID,
+		    DEVICE_ID,
+		    DEVICE_TYPE,
+		    AUTH_LEVEL,
+		    DEVICE_NAME,
+		    BIND_TIME,
+		    BIND_WIFI
+		FROM
+		    YB_T_DEVICE_BIND
+    </sql>
+
+</mapper>

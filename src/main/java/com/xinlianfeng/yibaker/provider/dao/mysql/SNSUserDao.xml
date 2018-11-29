@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSUserDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.UserSNSCount" id="userSNSCountResultMap">  
+	    <id property="fans_count" column="FANS_COUNT" />  
+	    <result property="following_count" column="FOLLOWING_COUNT" />  
+	    <result property="recipe_count" column="RECIPE_COUNT" />  
+	    <result property="work_count" column="WORK_COUNT" />  
+	    <result property="collect_count" column="COLLECT_COUNT" />  
+	    <result property="download_count" column="DOWNLOAD_COUNT" />  
+	    <result property="mission_count" column="MISSION_COUNT" />  
+	    <result property="order_count" column="ORDER_COUNT" />  
+	</resultMap>  
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSUser" id="snsUserResultMap">  
+	    <result property="is_follow" column="IS_FOLLOW" />  
+	    <result property="follow_time" column="FOLLOW_TIME" />  
+	</resultMap>  
+
+	<insert id="insertUpdateFollow" parameterType="com.xinlianfeng.yibaker.common.req.FollowUserReq" >
+		insert into
+		YB_T_SNS_USER (
+		FROM_USER_ID,
+		TO_USER_ID,
+		IS_FOLLOW,
+		FOLLOW_TIME)
+		values (
+		#{from_user_id}, 
+		#{to_user_id},
+		#{is_follow},
+		#{follow_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_FOLLOW=#{is_follow},
+		FOLLOW_TIME=#{follow_time}
+	</insert>
+
+ 	<!-- 是否关注 -->
+     <select id="isFollow"  resultType="int">
+     	select ifnull(sum(IS_FOLLOW),0) IS_FOLLOW  from YB_T_SNS_USER where  TO_USER_ID = #{user_id} and FROM_USER_ID = #{yb_user_id}
+    </select>
+ 	<!-- 
+    <select id="getSNS" parameterType="long" resultMap="snsUserResultMap">
+ 		(select TO_USER_ID, sum(IS_FOLLOW) IS_FOLLOW from YB_T_SNS_USER where TO_USER_ID = {yb_user_id} group by TO_USER_ID) il on us.TO_USER_ID = il.TO_USER_ID
+    	select sum(IS_FOLLOW) IS_FOLLOW sum(FOLLOW_TIME) FOLLOW_TIME from YB_T_SNS_USER
+    	<where>
+			<choose>
+				<when test="0 == friend_type">  
+					FROM_USER_ID=#{user_id} and TO_USER_ID=#{yb_user_id}
+				</when >
+	            <otherwise>  
+					TO_USER_ID=#{user_id} and FROM_USER_ID=#{yb_user_id}
+	            </otherwise>  
+			</choose>
+		</where>
+    </select>
+ 	 -->
+    	
+ 
+</mapper>

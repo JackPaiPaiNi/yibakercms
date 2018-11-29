@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSMyRecipe" id="snsMyRecipeResultMap">  
+	    <result property="is_collect" column="IS_COLLECT" />  
+	    <result property="is_like" column="IS_LIKE" />  
+	    <result property="is_download" column="IS_DOWNLOAD" />  
+	</resultMap>  
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeSNSCount" id="recipeSNSCountResultMap">  
+	    <result property="collect_count" column="COLLECT_COUNT" />  
+	    <result property="like_count" column="LIKE_COUNT" />  
+	    <result property="download_count" column="DOWNLOAD_COUNT" />  
+	    <result property="do_count" column="DO_COUNT" />  
+	    <result property="share_count" column="SHARE_COUNT" />  
+	</resultMap>  
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSOpTime" id="snsOpTimeResultMap">  
+	    <result property="collect_time" column="COLLECT_TIME" />  
+	    <result property="like_time" column="LIKE_TIME" />  
+	    <result property="download_time" column="DOWNLOAD_TIME" />  
+	</resultMap>  
+
+	<insert id="insertUpdateLike" parameterType="com.xinlianfeng.yibaker.common.req.LikeRecipeReq" >
+		insert into
+		YB_T_SNS_RECIPE (
+		YB_USER_ID,
+		RECIPE_ID,
+		IS_LIKE,
+		LIKE_TIME)
+		values (
+		#{yb_user_id}, 
+		#{recipe_id},
+		#{is_like},
+		#{like_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_LIKE=#{is_like},
+		LIKE_TIME=#{like_time}
+	</insert>
+
+	<insert id="insertUpdateCollect" parameterType="com.xinlianfeng.yibaker.common.req.CollectRecipeReq" >
+		insert into
+		YB_T_SNS_RECIPE (
+		YB_USER_ID,
+		RECIPE_ID,
+		IS_COLLECT,
+		COLLECT_TIME)
+		values (
+		#{yb_user_id}, 
+		#{recipe_id},
+		#{is_collect},
+		#{collect_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_COLLECT=#{is_collect},
+		COLLECT_TIME=#{collect_time}
+	</insert>
+
+	<insert id="insertUpdateDownload" parameterType="com.xinlianfeng.yibaker.common.req.DownloadRecipeReq" >
+		insert into
+		YB_T_SNS_RECIPE (
+		YB_USER_ID,
+		RECIPE_ID,
+		IS_DOWNLOAD,
+		DOWNLOAD_TIME)
+		values (
+		#{yb_user_id}, 
+		#{recipe_id},
+		#{is_download},
+		#{download_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_DOWNLOAD=#{is_download},
+		DOWNLOAD_TIME=#{download_time}
+	</insert>
+
+ 	<!-- 是否下载 -->
+     <select id="isDownload"  resultType="int">
+     	select ifnull(sum(IS_DOWNLOAD),0) IS_DOWNLOAD  from YB_T_SNS_RECIPE where  YB_USER_ID = #{yb_user_id} and RECIPE_ID = #{recipe_id}
+    </select>
+
+ 	<!-- 是否收藏/下载/点赞 -->
+     <select id="getSNSMyRecipe"  resultType="com.xinlianfeng.yibaker.common.entity.SNSMyRecipe">
+     	select 
+     		ifnull(sum(IS_COLLECT),0) IS_COLLECT,
+     		ifnull(sum(IS_LIKE),0) IS_LIKE,
+     		ifnull(sum(IS_DOWNLOAD),0) IS_DOWNLOAD
+     	from YB_T_SNS_RECIPE 
+     	where  YB_USER_ID = #{yb_user_id} and RECIPE_ID = #{recipe_id}
+    </select>
+
+</mapper>

@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ColumnRecipeDao">
+
+	<!-- 最新菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="latestRecipeResultMap" >
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 最新菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeListResp" id="latestRecipeListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="latestRecipeResultMap"/>
+	</resultMap>
+
+	<!-- 栏目菜谱信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" id="columnRecipeResultMap" >
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSRecipeDao.recipeSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+	</resultMap>
+
+	<!-- 栏目菜谱列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.RecipeListResp" id="columnRecipeListMap" >
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="columnRecipeResultMap"/>
+	</resultMap>
+
+	<!-- 查询首页幻灯片列表 -->
+    <select id="getSlideAll" resultMap ="latestRecipeListMap">
+        <include refid="selectSlideAllSql"></include>
+		<where>
+			rc.COLUMN_ID = 1
+			and r.RECIPE_STATUS = 1
+			and r.DR = 0
+		</where>
+		 order by rc.LINK_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询最新菜谱列表 -->
+    <select id="getLatestAll" resultMap ="latestRecipeListMap">
+        <include refid="selectLatestAllSql"></include>
+		<where>
+			r.RECIPE_STATUS = 1
+			and r.DR = 0
+		</where>
+		 order by r.UPDATE_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询热度榜列表 -->
+    <select id="getHotAll" resultMap ="columnRecipeListMap">
+        <include refid="selectHotAllSql"></include>
+    </select>
+
+	<!-- 查询TOP10列表 -->
+    <select id="getTopAll" resultMap ="columnRecipeListMap">
+        <include refid="selectTopAllSql"></include>
+    </select>
+
+	<!-- 查询首页幻灯片列表sql -->
+     <sql id="selectSlideAllSql">
+    	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+			YB_T_RECIPE_COLUMN_LINK  rc
+				LEFT JOIN
+		    YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+				LEFT JOIN
+			YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+    </sql>
+
+	<!-- 查询最新菜谱列表sql -->
+     <sql id="selectLatestAllSql">
+    	SELECT  
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE r
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID
+				LEFT JOIN
+			YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+    </sql>
+
+	<!-- 查询热度榜列表sql -->
+     <sql id="selectHotAllSql">
+    	SELECT
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE_COLUMN_LINK  rc
+				LEFT JOIN
+			YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT, sum(IS_LIKE) LIKE_COUNT, sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID 
+				LEFT JOIN
+			YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+		WHERE rc.COLUMN_ID = 3 and  r.RECIPE_STATUS = 1 and r.DR =0
+		ORDER BY rc.WEIGHT DESC LIMIT #{limit}
+    </sql>
+
+	<!-- 查询Top10列表sql -->
+     <sql id="selectTopAllSql">
+    	SELECT
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    re.RECIPE_NO,
+		    re.RECIPE_MANUID
+		FROM
+		    YB_T_RECIPE_COLUMN_LINK  rc
+				LEFT JOIN
+			YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+		        LEFT JOIN
+			(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT, sum(IS_LIKE) LIKE_COUNT, sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID 
+				LEFT JOIN
+			YB_T_RECIPE_EXT re on r.RECIPE_ID = re.RECIPE_ID
+		WHERE rc.COLUMN_ID = 4 and  r.RECIPE_STATUS = 1 and r.DR =0
+			ORDER BY rc.WEIGHT DESC LIMIT #{limit}
+    </sql>
+
+<!-- 
+    <sql id="selectHotAllSql">
+    	SELECT  * FROM(
+	    	(SELECT
+			    r.RECIPE_ID,
+			    r.RECIPE_NAME,
+			    r.RECIPE_TYPE,
+			    r.KEYWORD,
+			    r.RECIPE_BRIEF,
+			    r.RECIPE_CONTENT,
+			    r.RECIPE_IMAGE,
+			    r.RECIPE_VIDEO,
+			    r.CREATE_TIME,
+			    r.UPDATE_TIME,
+			    r.RECIPE_PRICE,
+			    r.DEGREE,
+			    r.TIME_RANGE,
+			    r.RECIPE_STATUS,
+			    r.E_MALL_URL,
+			    rop.COLLECT_COUNT,
+			    rop.LIKE_COUNT,
+			    rop.DOWNLOAD_COUNT,
+			    wop.DO_COUNT,
+			    sop.SHARE_COUNT,
+			    ui.YB_USER_ID,
+			    ui.NICKNAME,
+			    ui.PHOTO,
+			    ui.LEVEL_ID,
+			    rc.COLUMN_ID+10000 WEIGHT
+			FROM
+			    YB_T_RECIPE_COLUMN_LINK  rc
+					LEFT JOIN
+				YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+			        LEFT JOIN
+				(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT, sum(IS_LIKE) LIKE_COUNT, sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+			        LEFT JOIN
+			    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+			        LEFT JOIN
+			    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+					LEFT JOIN
+				YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID 
+			WHERE rc.COLUMN_ID = 3 and  r.RECIPE_STATUS = 1 and r.DR =0)
+		UNION
+	    	(SELECT
+			    r1.RECIPE_ID,
+			    r1.RECIPE_NAME,
+			    r1.RECIPE_TYPE,
+			    r1.KEYWORD,
+			    r1.RECIPE_BRIEF,
+			    r1.RECIPE_CONTENT,
+			    r1.RECIPE_IMAGE,
+			    r1.RECIPE_VIDEO,
+			    r1.CREATE_TIME,
+			    r1.UPDATE_TIME,
+			    r1.RECIPE_PRICE,
+			    r1.DEGREE,
+			    r1.TIME_RANGE,
+			    r1.RECIPE_STATUS,
+			    r1.E_MALL_URL,
+			    rop1.COLLECT_COUNT,
+			    rop1.LIKE_COUNT,
+			    rop1.DOWNLOAD_COUNT,
+			    wop1.DO_COUNT,
+			    sop1.SHARE_COUNT,
+			    ui1.YB_USER_ID,
+			    ui1.NICKNAME,
+			    ui1.PHOTO,
+			    ui1.LEVEL_ID,
+			    WEIGHT
+			FROM
+			    YB_T_RECIPE  r1
+			        LEFT JOIN
+				(SELECT RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop1 on r1.RECIPE_ID = rop1.RECIPE_ID
+			        LEFT JOIN
+			    (SELECT RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop1 on r1.RECIPE_ID = wop1.RECIPE_ID   
+			        LEFT JOIN
+			    (SELECT RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop1 on r1.RECIPE_ID = sop1.RECIPE_ID   
+					LEFT JOIN
+				YB_T_USER_INFO ui1 on r1.YB_USER_ID = ui1.YB_USER_ID
+					RIGHT JOIN
+				(SELECT RECIPE_ID, SUM(IS_LIKE) + 2 * SUM(IS_COLLECT) + 4 * SUM(IS_DOWNLOAD) WEIGHT FROM YB_T_SNS_RECIPE
+				WHERE 
+				COLLECT_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 1000 
+				OR LIKE_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 1000 
+				OR DOWNLOAD_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 1000
+				GROUP BY RECIPE_ID) rop2 ON r1.RECIPE_ID = rop2.RECIPE_ID 
+				WHERE r1.RECIPE_STATUS = 1 and r1.DR =0)) tb 
+				ORDER BY WEIGHT DESC LIMIT #{limit}
+    </sql>
+
+     <sql id="selectTopAllSql">
+    	SELECT  * FROM(
+	    	(SELECT
+			    r.RECIPE_ID,
+			    r.RECIPE_NAME,
+			    r.RECIPE_TYPE,
+			    r.KEYWORD,
+			    r.RECIPE_BRIEF,
+			    r.RECIPE_CONTENT,
+			    r.RECIPE_IMAGE,
+			    r.RECIPE_VIDEO,
+			    r.CREATE_TIME,
+			    r.UPDATE_TIME,
+			    r.RECIPE_PRICE,
+			    r.DEGREE,
+			    r.TIME_RANGE,
+			    r.RECIPE_STATUS,
+			    r.E_MALL_URL,
+			    rop.COLLECT_COUNT,
+			    rop.LIKE_COUNT,
+			    rop.DOWNLOAD_COUNT,
+			    wop.DO_COUNT,
+			    sop.SHARE_COUNT,
+			    ui.YB_USER_ID,
+			    ui.NICKNAME,
+			    ui.PHOTO,
+			    ui.LEVEL_ID,
+			    rc.COLUMN_ID+10000 WEIGHT
+			FROM
+			    YB_T_RECIPE_COLUMN_LINK  rc
+					LEFT JOIN
+				YB_T_RECIPE r on rc.RECIPE_ID = r.RECIPE_ID
+			        LEFT JOIN
+				(select RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT, sum(IS_LIKE) LIKE_COUNT, sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+			        LEFT JOIN
+			    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+			        LEFT JOIN
+			    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+					LEFT JOIN
+				YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID 
+			WHERE rc.COLUMN_ID = 4 and  r.RECIPE_STATUS = 1 and r.DR =0)
+		UNION
+	    	(SELECT
+			    r1.RECIPE_ID,
+			    r1.RECIPE_NAME,
+			    r1.RECIPE_TYPE,
+			    r1.KEYWORD,
+			    r1.RECIPE_BRIEF,
+			    r1.RECIPE_CONTENT,
+			    r1.RECIPE_IMAGE,
+			    r1.RECIPE_VIDEO,
+			    r1.CREATE_TIME,
+			    r1.UPDATE_TIME,
+			    r1.RECIPE_PRICE,
+			    r1.DEGREE,
+			    r1.TIME_RANGE,
+			    r1.RECIPE_STATUS,
+			    r1.E_MALL_URL,
+			    rop1.COLLECT_COUNT,
+			    rop1.LIKE_COUNT,
+			    rop1.DOWNLOAD_COUNT,
+			    wop1.DO_COUNT,
+			    sop1.SHARE_COUNT,
+			    ui1.YB_USER_ID,
+			    ui1.NICKNAME,
+			    ui1.PHOTO,
+			    ui1.LEVEL_ID,
+			    WEIGHT
+			FROM
+			    YB_T_RECIPE  r1
+			        LEFT JOIN
+				(SELECT RECIPE_ID, sum(IS_COLLECT) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop1 on r1.RECIPE_ID = rop1.RECIPE_ID
+			        LEFT JOIN
+			    (SELECT RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop1 on r1.RECIPE_ID = wop1.RECIPE_ID   
+			        LEFT JOIN
+			    (SELECT RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop1 on r1.RECIPE_ID = sop1.RECIPE_ID   
+					LEFT JOIN
+				YB_T_USER_INFO ui1 on r1.YB_USER_ID = ui1.YB_USER_ID
+					RIGHT JOIN
+				(SELECT RECIPE_ID, SUM(IS_LIKE) + 2 * SUM(IS_COLLECT) + 4 * SUM(IS_DOWNLOAD) WEIGHT FROM YB_T_SNS_RECIPE
+				WHERE 
+				COLLECT_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 7 DAY)) * 1000 
+				OR LIKE_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 7 DAY)) * 1000 
+				OR DOWNLOAD_TIME >= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 7 DAY)) * 1000
+				GROUP BY RECIPE_ID) rop2 ON r1.RECIPE_ID = rop2.RECIPE_ID 
+				WHERE r1.RECIPE_STATUS = 1 and r1.DR =0)) tb 
+				ORDER BY WEIGHT DESC LIMIT #{limit}
+    </sql>
+ -->
+</mapper>

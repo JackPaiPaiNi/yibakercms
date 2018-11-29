@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.AlipayResultDao">
+
+   <insert id="createAlipayResult" parameterType="com.xinlianfeng.yibaker.common.entity.AlipayResult" useGeneratedKeys="true" keyProperty="alpy_oid">
+   	insert into YB_T_ALIPAY_RESULT (  ALPY_OID, NOTIFY_TIME, NOTIFY_TYPE, NOTIFY_ID, SIGN_TYPE, SIGN, OUT_TRADE_NO, SUBJECT, PAYMENT_TYPE, TRADE_NO, TRADE_STATUS, SELLER_ID, SELLER_EMAIL, BUYER_ID, BUYER_EMAIL, TOTAL_FEE, QUANTITY, PRICE, BODY, GMT_CREATE, GMT_PAYMENT, IS_TOTAL_FEE_ADJUST, USE_COUPON, DISCOUNT, REFUND_STATUS, GMT_REFUND, NOTE ) 
+   	 values (  #{alpy_oid}, #{notify_time}, #{notify_type}, #{notify_id}, #{sign_type}, #{sign}, #{out_trade_no}, #{subject}, #{payment_type}, #{trade_no}, #{trade_status}, #{seller_id}, #{seller_email}, #{buyer_id}, #{buyer_email}, #{total_fee}, #{quantity}, #{price}, #{body}, #{gmt_create}, #{gmt_payment}, #{is_total_fee_adjust}, #{use_coupon}, #{discount}, #{refund_status}, #{gmt_refund}, #{note} )
+   </insert> 
+   
+   <select id="findOneByOrderno" resultType="com.xinlianfeng.yibaker.common.entity.AlipayResult">
+   	select ALPY_RID, ALPY_OID, NOTIFY_TIME, NOTIFY_TYPE, NOTIFY_ID, SIGN_TYPE, SIGN, OUT_TRADE_NO, SUBJECT, PAYMENT_TYPE, TRADE_NO, TRADE_STATUS, SELLER_ID, SELLER_EMAIL, BUYER_ID, BUYER_EMAIL, TOTAL_FEE, QUANTITY, PRICE, BODY, GMT_CREATE, GMT_PAYMENT, IS_TOTAL_FEE_ADJUST, USE_COUPON, DISCOUNT, REFUND_STATUS, GMT_REFUND, NOTE
+   	   from YB_T_ALIPAY_RESULT 
+   	   where OUT_TRADE_NO = #{out_trade_no}
+   </select>
+   
+   <update id="updateAlipayResultStatus" parameterType="com.xinlianfeng.yibaker.common.entity.AlipayResult">
+   	update YB_T_ALIPAY_RESULT 
+   		set TRADE_STATUS = #{trade_status}
+   		where OUT_TRADE_NO = #{out_trade_no}
+   </update>
+   
+</mapper>

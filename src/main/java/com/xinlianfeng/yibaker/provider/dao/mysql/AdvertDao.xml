@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.AdvertDao">
+
+	<!-- 广告信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.Advert" id="advertResultMap">  
+	    <id property="ad_name" column="AD_NAME" />  
+	    <result property="ad_type" column="AD_TYPE" />  
+	    <result property="image_url" column="IMAGE_URL" />  
+	    <result property="link_url" column="LINK_URL" />  
+	</resultMap>  
+	
+    <select id="getInfo" resultMap="advertResultMap">
+       <include refid="selectAdvertSql"></include>
+		<where>
+			 AD_TYPE = #{ad_type}  limit 1
+		</where>
+    </select>
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.Advert">
+       <include refid="selectAdvertSql"></include>
+		<where>
+			 AD_TYPE = #{ad_type}
+		</where>
+		 order by AD_ID desc limit #{limit}
+    </select>
+
+    <sql id="selectAdvertSql">
+    	SELECT 
+		    AD_NAME,
+		    AD_TYPE,
+		    IMAGE_URL,
+		    LINK_URL
+		FROM
+		    YB_T_AD
+    </sql>
+
+</mapper>

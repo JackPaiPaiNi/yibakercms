@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.KeyWordDao">
+	<select id="getKeyWords" parameterType="Integer" resultType="com.xinlianfeng.yibaker.common.resp.KeyWord">
+		SELECT
+			tag.TAG_NAME
+		FROM
+			YB_T_ITEM_TAG item_tag
+		LEFT JOIN YB_T_TAG tag ON item_tag.TAG_ID = tag.TAG_ID
+		LEFT JOIN YB_T_ITEM item ON item_tag.ITEM_ID = item.ITEM_ID
+		WHERE
+		 tag.`STATUS` = 1
+		AND tag.HOT_FLAG = 1 
+		ORDER BY tag.PRIORITY DESC
+		LIMIT #{limit}
+	</select>
+</mapper>

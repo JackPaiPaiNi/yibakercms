@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<project name="yibaker-provider" default="" basedir=".">
+	<!-- 工程properties-->
+	<property file="build.properties"/>
+	<!-- 工程路径-->
+	<property name="workspace.path"  value="../"/>
+	<!-- 项目名称 -->
+	<property name="project.name"  value="${ant.project.name}"/>
+	<!-- 项目路径  -->
+	<property name="project.path"  value="${workspace.path}/${project.name}"/>
+	<!-- 项目源码 -->
+	<property name="project.src"  value="${project.path}/src/main/java"/>
+	<!-- 项目lib path -->
+	<property name="project.lib"  value="${project.path}/lib"/>
+	<!-- 项目resources path -->
+	<property name="project.resources"  value="${project.path}/src/main/resources"/>
+	<!-- ant打包输出地址  -->
+	<property name="build.path"  value="${project.path}/build"/>
+	<!-- 获取系统时间 -->
+	<tstamp>
+		<format property="datetime" pattern="yyyy-MM-dd" locale="zh"/>
+	</tstamp>
+	<!-- 工程jar名字 -->
+	<property name="project.jar" value="${project.name}-${project.version}.jar"/>
+	<!-- 工程zip名字 -->
+	<property name="project.zip" value="${project.name}-${project.version}.zip"/>
+
+	<!--设置classpath属性-->
+	<path id="classpath">
+		<fileset dir="${project.path}/lib">
+			<include name="**/*.jar" />
+			<include name="**/*.so" />
+			<include name="**/*.dll" />
+		</fileset>
+	</path>
+
+	<!-- 编译 -->
+	<target name="compile" description="Compile main source tree java files">
+		<delete dir="${build.path}"/>
+		<mkdir dir="${build.path}"/>
+		<javac srcdir="${project.src}" destdir="${build.path}/"
+			encoding="UTF-8" debug="true" nowarn="true" source="1.6" target="1.6" includeantruntime="on">
+			<src path="${build.path}"/>
+			<compilerarg line="-Xlint:unchecked" />
+			<classpath refid="classpath"/>
+		</javac>
+		
+		<!-- 源码编译进去 -->
+		<copy todir="${build.path}">
+			<fileset dir="${project.src}">
+				<include name="**/*.*" />
+			</fileset>
+		</copy>
+	</target>
+
+
+	<!-- 打jar文件 -->
+	<target name="toJar" depends="compile" description="编译工程到jar文件">
+		<delete dir="${build.path}/${project.jar}"/>
+		<jar basedir="${build.path}" destfile="${build.path}/${project.jar}"  encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${build.path}">
+				<include name="*.*" />
+			</fileset>
+		</jar>
+		<delete dir="${build.path}/com">
+		</delete>
+	</target>
+
+	<!-- 打zip文件 -->
+	<target name="toZip" depends="toJar" description="编译工程相关文件到zip">
+		<delete dir="${build.path}/${project.zip}"/>
+		<delete dir="${build.path}/${project.name}"/>
+		<mkdir dir="${build.path}/${project.name}/logs"/>
+		<mkdir dir="${build.path}/${project.name}/bin"/>
+		<mkdir dir="${build.path}/${project.name}/conf"/>
+		<mkdir dir="${build.path}/${project.name}/conf/dic"/>
+		<mkdir dir="${build.path}/${project.name}/index"/>
+		<replaceregexp  match="&#13;&#10;" replace="&#10;" flags="g" byline="false"/>
+		<!-- copy jar -->
+		<copy todir="${build.path}/${project.name}/lib" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.lib}">
+				<include name="*.*"/>
+			</fileset>
+			<fileset dir="${build.path}">
+				<include name="${project.jar}"/>
+			</fileset>
+		</copy>
+
+		<!-- copy resources file -->
+		<copy todir="${build.path}/${project.name}/conf" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.resources}">
+				<include name="**.**"/>
+			</fileset>
+		</copy>
+
+		<!-- copy dic file -->
+		<copy todir="${build.path}/${project.name}/conf/dic" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.resources}/dic">
+				<include name="**.**"/>
+			</fileset>
+		</copy>
+
+		<!-- copy bin file -->
+		<copy todir="${build.path}/${project.name}/bin" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.resources}/bin">
+				<include name="**.**"/>
+			</fileset>
+		</copy>
+
+		<!-- copy index file -->
+		<copy todir="${build.path}/${project.name}/index" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.path}/index">
+				<include name="**"/>
+			</fileset>
+		</copy>
+
+		<!-- copy release file -->
+		<copy todir="${build.path}/${project.name}" encoding="UTF-8">
+			<!--要打包的开始目录-->
+			<fileset dir="${project.path}">
+				<include name="release"/>
+			</fileset>
+		</copy>
+
+		<!-- copy jar file -->
+		<delete file = "${build.path}/${project.jar}"/>
+		<zip destfile="${build.path}/${project.zip}">
+			<fileset dir="${build.path}">
+				<exclude name="**.**"/>
+			</fileset>
+		</zip>
+
+		<delete dir = "${build.path}/${project.name}"/>
+	</target>
+	
+	<target name="patch209" depends="toJar" description="upload jar to server">
+		<echo> patch files to server209 ... </echo>
+		<scp todir="${upload209.dir}" keyfile="E:\烤箱项目\部署\服务器密钥\服务器密钥\12" passphrase=""  trust="true">
+		   <fileset dir="${build.path}">
+		   		<include name="*.jar"/>
+		   </fileset>
+		   <fileset dir="${project.lib}">
+		   		<include name="yibaker-common-1.0.0.jar"/>
+		   </fileset>
+		</scp>
+	</target>
+
+</project>
+
+<!--Ant工具为java项目提供跨平台构建任务-->

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeCurveDao">
+
+	<!-- 菜谱曲线详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeCurve" id="recipeCurveResultMap">  
+	    <id property="curve_id" column="CURVE_ID" />  
+	    <result property="recipe_id" column="RECIPE_ID" />  
+	    <result property="device_type" column="DEVICE_TYPE" />  
+	    <result property="curve_content" column="CURVE_CONTENT" />  
+	</resultMap>  
+
+	<insert id="createRecipeCurve" parameterType="com.xinlianfeng.yibaker.common.entity.RecipeCurve"  useGeneratedKeys="true" keyProperty="curve_id">
+		insert into
+		YB_T_RECIPE_CURVE (
+		RECIPE_ID, 
+		DEVICE_ID, 
+		DEVICE_TYPE, 
+		CURVE_CONTENT)
+		values (
+		#{recipe_id}, 
+		#{device_id},
+		#{device_type}, 
+		#{curve_content})
+	</insert>
+
+</mapper>

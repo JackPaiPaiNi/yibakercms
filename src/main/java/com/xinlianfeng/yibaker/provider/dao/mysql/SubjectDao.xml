@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SubjectDao">
+
+	<!-- 话题简介 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SubjectBriefInfo" id="subjectBriefInfoResultMap">  
+	    <id property="subject_id" column="SUBJECT_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="subject_name" column="SUBJECT_NAME" />  
+	    <result property="subject_brief" column="SUBJECT_BRIEF" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	</resultMap>  
+	
+	<!-- 话题详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.Subject" id="subjectResultMap">  
+	    <id property="subject_id" column="SUBJECT_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="type_id" column="TYPE_ID" />  
+	    <result property="board_id" column="BOARD_ID" />  
+	    <result property="subject_name" column="SUBJECT_NAME" />  
+	    <result property="subject_brief" column="SUBJECT_BRIEF" />  
+	    <result property="subject_content" column="SUBJECT_CONTENT" />  
+	    <result property="subject_image" column="SUBJECT_IMAGE" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	    <result property="last_reply_time" column="LAST_REPLY_TIME" />  
+	</resultMap>  
+
+	<!-- 话题所有信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.SubjectDetailResp" id="subjectDetailResultMap">
+		<association property="subject" resultMap="subjectResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeBriefInfoResultMap"/>
+		<association property="mysns" resultMap="snsMySubjectMap"/>
+	</resultMap>
+	
+	<!-- 话题收藏和点赞等信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSMySubject" id="snsMySubjectMap">  
+	    <!-- <id property="sns_id" column="SNS_ID" />   -->
+	    <result property="is_like" column="IS_LIKE" /> 
+	</resultMap>  
+
+	<!-- 话题简介信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.SubjectBriefResp" id="subjectOneResultMap" >
+		<association property="subject" resultMap="subjectResultMap"/>
+		<association property="snscount" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSSubjectDao.subjectSNSCountResultMap"/>
+		<association property="user" resultMap="com.xinlianfeng.yibaker.provider.dao.UserInfoDao.userBriefResultMap"/>
+		<association property="recipe" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.recipeBriefInfoResultMap"/>
+		<association property="mysns" resultMap="snsMySubjectMap"/>
+	</resultMap>
+
+	<!-- 话题列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.SubjectListResp" id="subjectListMap" >
+		<collection  property="subjectlist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.SubjectBriefResp" resultMap="subjectOneResultMap"/>
+	</resultMap>
+
+	<!-- 创建话题 -->
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.Subject"  useGeneratedKeys="true" keyProperty="subject_id">
+		insert into
+		YB_T_SUBJECT (
+		YB_USER_ID, 
+		BOARD_ID, 
+		SUBJECT_NAME, 
+		SUBJECT_BRIEF, 
+		SUBJECT_CONTENT, 
+		SUBJECT_IMAGE, 
+		UPDATE_TIME, 
+		CREATE_TIME,
+		NOTE
+		)
+		values (
+		#{yb_user_id}, 
+		#{board_id}, 
+		#{subject_name}, 
+		#{subject_brief}, 
+		#{subject_content}, 
+		#{subject_image}, 
+		#{update_time}, 
+		#{create_time},
+		#{note}
+		)
+	</insert>
+
+	<!-- 查询话题详情 -->
+     <select id="getInfo" resultMap ="subjectDetailResultMap">
+    	<include refid="selectSubjectDetailSql"></include>
+    	<where> s.SUBJECT_ID = #{subject_id} and s.DR = 0</where>
+    </select>
+    
+    <!-- 查询话题详情 -->
+     <select id="getSubjectInfo" resultMap ="subjectDetailResultMap">
+    	<include refid="selectSubjectDetailSqlV3"></include>
+    	<where> s.SUBJECT_ID = #{subject_id} and s.DR = 0</where>
+    </select>
+ 
+ 	<!-- 查询话题简介 -->
+     <select id="getBriefInfo" resultMap ="subjectBriefInfoResultMap">
+    	SELECT 
+		    SUBJECT_ID,
+		    YB_USER_ID,
+		    SUBJECT_NAME,
+		    SUBJECT_BRIEF,
+		    CREATE_TIME
+		FROM
+		    YB_T_SUBJECT
+		WHERE SUBJECT_ID = #{subject_id} and DR = 0
+    </select>
+
+	<!-- 查询我的话题列表 -->
+    <select id="getMytList" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSqlV3"></include>
+		<where>
+			<if test="0 != yb_user_id">
+				s.YB_USER_ID=#{yb_user_id}
+			</if>
+			<if test="0 != subject_id">
+				<![CDATA[
+					and s.SUBJECT_ID < #{subject_id}
+				]]> 
+			</if>
+			and s.DR = 0
+		</where>
+		 order by s.SUBJECT_ID desc limit #{limit}
+    </select>
+
+	<!-- 查询我的话题总数 -->
+    <select id="getMyTotal" resultType="int">
+   	 	select count(*) from YB_T_SUBJECT 
+		<where>
+			<if test="0 != yb_user_id">
+				YB_USER_ID=#{yb_user_id}
+			</if>
+			and DR = 0
+		</where>
+    </select>
+
+	<!-- 查询话题列表 -->
+    <select id="getList" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSql"></include>
+		<where>
+			<if test="0 != board_id">
+				s.BOARD_ID=#{board_id}
+			</if>
+			<if test="0 != subject_id">
+				<![CDATA[
+					and s.SUBJECT_ID < #{subject_id}
+				]]> 
+			</if>
+			and s.TYPE_ID = 1 and s.DR = 0
+		</where>
+		 order by s.SUBJECT_ID desc limit #{limit}
+    </select>
+    
+    <!-- 查询话题列表 -->
+    <select id="getSubjectList" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSqlV3"></include>
+		<where>
+			<if test="0 != board_id">
+				s.BOARD_ID=#{board_id}
+			</if>
+			<if test="0 != subject_id">
+				<![CDATA[
+					and s.SUBJECT_ID < #{subject_id}
+				]]> 
+			</if>
+			and s.TYPE_ID = 1 and s.DR = 0
+		</where>
+		 order by s.SUBJECT_ID desc limit #{limit}
+    </select>
+    
+    <!-- 查询话题列表,按最新评论时间排序  -->
+    <select id="findSubjects" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSql2"></include>
+		<where>
+			<if test="0 != board_id">
+				s.BOARD_ID=#{board_id}
+			</if>
+			<if test="0 != last_reply_time">
+				<![CDATA[
+					and ifnull(r.LAST_REPLY_TIME, s.CREATE_TIME)<#{last_reply_time}
+				]]> 
+			</if>
+			and s.TYPE_ID = 1 and s.DR = 0
+		</where>
+		 order by LAST_REPLY_TIME desc limit #{limit}
+    </select>
+
+	<!-- 查询话题总数 -->
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_SUBJECT 
+		<where>
+			<if test="0 != board_id">
+				BOARD_ID=#{board_id}
+			</if>
+			and TYPE_ID = 1 and DR = 0
+		</where>
+    </select>
+
+	<!-- 查询所有分类话题总数 -->
+    <select id="getAllTotal" resultType="int">
+   	 	select count(*) from YB_T_SUBJECT 
+		<where>
+			<if test="0 != board_id">
+				BOARD_ID=#{board_id}
+			</if>
+			and DR = 0
+		</where>
+    </select>
+
+	<!-- 查询话题置顶列表 -->
+    <select id="getTopSubjectList" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSqlV3"></include>
+		<where>
+			<if test="0 != board_id">
+				s.BOARD_ID=#{board_id}
+			</if>
+			and s.TYPE_ID = 2 and s.DR = 0
+		</where>
+		 order by s.SUBJECT_ID desc limit #{limit}
+    </select>
+    
+    <!-- 查询话题置顶列表 -->
+    <select id="getTopList" resultMap ="subjectListMap">
+        <include refid="selectSubjectListSql"></include>
+		<where>
+			<if test="0 != board_id">
+				s.BOARD_ID=#{board_id}
+			</if>
+			and s.TYPE_ID = 2 and s.DR = 0
+		</where>
+		 order by s.SUBJECT_ID desc limit #{limit}
+    </select>
+
+	<!-- 查询话题详情sql -->
+   <sql id="selectSubjectDetailSql">
+    	SELECT 
+		    s.SUBJECT_ID,
+		    s.YB_USER_ID,
+		    s.TYPE_ID,
+		    s.BOARD_ID,
+		    s.SUBJECT_NAME,
+		    s.SUBJECT_BRIEF,
+		    s.SUBJECT_CONTENT,
+		    s.SUBJECT_IMAGE,
+		    s.CREATE_TIME,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+			r.RECIPE_NAME,
+			r.RECIPE_IMAGE
+		FROM
+		    YB_T_SUBJECT s
+				LEFT JOIN
+			YB_T_USER_INFO u on s.YB_USER_ID = u.YB_USER_ID
+				left join
+			YB_T_RECIPE r on s.NOTE = r.RECIPE_ID
+    </sql>
+    
+    <!-- 查询话题详情sql -->
+   <sql id="selectSubjectDetailSqlV3">
+    	SELECT 
+		    s.SUBJECT_ID,
+		    s.YB_USER_ID,
+		    s.TYPE_ID,
+		    s.BOARD_ID,
+		    s.SUBJECT_NAME,
+		    s.SUBJECT_BRIEF,
+		    s.SUBJECT_CONTENT,
+		    s.SUBJECT_IMAGE,
+		    s.CREATE_TIME,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+			r.RECIPE_NAME,
+			r.RECIPE_IMAGE,
+		    ifnull(sub.IS_LIKE, 0) IS_LIKE
+		FROM
+		    YB_T_SUBJECT s
+				LEFT JOIN
+			YB_T_USER_INFO u on s.YB_USER_ID = u.YB_USER_ID
+				left join
+			YB_T_RECIPE r on s.NOTE = r.RECIPE_ID
+			    left join
+			YB_T_SNS_SUBJECT sub on s.SUBJECT_ID = sub.SUBJECT_ID   and  sub.YB_USER_ID = #{yb_user_id}
+    </sql>
+
+	<!-- 查询话题列表sql -->
+    <sql id="selectSubjectListSql">
+    	SELECT  
+		    s.SUBJECT_ID,
+		    s.YB_USER_ID,
+		    s.TYPE_ID,
+		    s.BOARD_ID,
+		    s.SUBJECT_NAME,
+		    s.SUBJECT_BRIEF,
+		    s.SUBJECT_CONTENT,
+		    s.SUBJECT_IMAGE,
+		    s.CREATE_TIME,
+		    r.REPLY_COUNT,
+		    ss.LIKE_COUNT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+			r.RECIPE_NAME,
+			r.RECIPE_IMAGE
+		FROM
+		    YB_T_SUBJECT s
+		        LEFT JOIN
+		    (select SUBJECT_ID, ifnull(count(*), 0) REPLY_COUNT from YB_T_SUBJECT_REPLY where DR = 0 group by SUBJECT_ID)  r on s.SUBJECT_ID = r.SUBJECT_ID   
+				LEFT JOIN
+			(select SUBJECT_ID, sum(IS_LIKE) LIKE_COUNT from YB_T_SNS_SUBJECT group by SUBJECT_ID) ss on s.SUBJECT_ID = ss.SUBJECT_ID
+				LEFT JOIN
+			YB_T_USER_INFO u on s.YB_USER_ID = u.YB_USER_ID
+			    left join
+			YB_T_RECIPE r on s.NOTE = r.RECIPE_ID 
+    </sql>
+    
+    <!-- 查询话题列表sql -->
+    <sql id="selectSubjectListSqlV3">
+    	SELECT  
+		    s.SUBJECT_ID,
+		    s.YB_USER_ID,
+		    s.TYPE_ID,
+		    s.BOARD_ID,
+		    s.SUBJECT_NAME,
+		    s.SUBJECT_BRIEF,
+		    s.SUBJECT_CONTENT,
+		    s.SUBJECT_IMAGE,
+		    s.CREATE_TIME,
+		    r.REPLY_COUNT,
+		    ss.LIKE_COUNT,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+			r.RECIPE_NAME,
+			r.RECIPE_IMAGE,
+			ifnull(sub.IS_LIKE, 0) IS_LIKE
+		FROM
+		    YB_T_SUBJECT s
+		        LEFT JOIN
+		    (select SUBJECT_ID, ifnull(count(*), 0) REPLY_COUNT from YB_T_SUBJECT_REPLY where DR = 0 group by SUBJECT_ID)  r on s.SUBJECT_ID = r.SUBJECT_ID   
+				LEFT JOIN
+			(select SUBJECT_ID, sum(IS_LIKE) LIKE_COUNT from YB_T_SNS_SUBJECT group by SUBJECT_ID) ss on s.SUBJECT_ID = ss.SUBJECT_ID
+				LEFT JOIN
+			YB_T_USER_INFO u on s.YB_USER_ID = u.YB_USER_ID
+			    left join
+			YB_T_RECIPE r on s.NOTE = r.RECIPE_ID 
+			    left join
+			YB_T_SNS_SUBJECT sub on s.SUBJECT_ID = sub.SUBJECT_ID  and  sub.YB_USER_ID = #{yb_user_id}
+    </sql>
+    
+    <sql id="selectSubjectListSql2">
+    	SELECT  
+		    s.SUBJECT_ID,
+		    s.YB_USER_ID,
+		    s.TYPE_ID,
+		    s.BOARD_ID,
+		    s.SUBJECT_NAME,
+		    s.SUBJECT_BRIEF,
+		    s.SUBJECT_CONTENT,
+		    s.SUBJECT_IMAGE,
+		    s.CREATE_TIME,
+		    r.REPLY_COUNT,
+		    ss.LIKE_COUNT,
+		    ifnull(r.LAST_REPLY_TIME, s.CREATE_TIME) LAST_REPLY_TIME,
+		    u.YB_USER_ID,
+		    u.NICKNAME,
+		    u.PHOTO,
+		    u.LEVEL_ID,
+		    r.RECIPE_ID,
+			r.RECIPE_NAME,
+			r.RECIPE_IMAGE
+		FROM
+		    YB_T_SUBJECT s
+		        LEFT JOIN
+		    (select SUBJECT_ID, ifnull(count(*), 0) REPLY_COUNT, max(REPLY_TIME) LAST_REPLY_TIME from YB_T_SUBJECT_REPLY where DR = 0 group by SUBJECT_ID)  r on s.SUBJECT_ID = r.SUBJECT_ID   
+				LEFT JOIN
+			(select SUBJECT_ID, sum(IS_LIKE) LIKE_COUNT from YB_T_SNS_SUBJECT group by SUBJECT_ID) ss on s.SUBJECT_ID = ss.SUBJECT_ID 
+				LEFT JOIN
+			YB_T_USER_INFO u on s.YB_USER_ID = u.YB_USER_ID
+			     left join
+			YB_T_RECIPE r on s.NOTE = r.RECIPE_ID
+    </sql>
+
+</mapper>

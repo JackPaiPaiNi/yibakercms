@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSWorkReplyDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.ReplySNSCount" id="workReplySNSCountResultMap">  
+	    <result property="like_count" column="LIKE_COUNT" />  
+	</resultMap>  
+
+	<insert id="insertUpdateLike" parameterType="com.xinlianfeng.yibaker.common.req.LikeWorkReplyReq" >
+		insert into
+		YB_T_SNS_WORK_REPLY (
+		W_REPLY_ID,
+		YB_USER_ID,
+		IS_LIKE,
+		LIKE_TIME)
+		values (
+		#{w_reply_id}, 
+		#{yb_user_id},
+		#{is_like},
+		#{like_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_LIKE=#{is_like},
+		LIKE_TIME=#{like_time}
+	</insert>
+
+</mapper>

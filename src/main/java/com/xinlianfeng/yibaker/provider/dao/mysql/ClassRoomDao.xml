@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ClassRoomDao">
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.ClassRoom">
+        <include refid="selectClassSql"></include>
+		<where>
+			<if test="0 != class_type">
+				CLASS_TYPE = #{class_type}
+			</if>
+			<if test="0 != class_id">
+				<![CDATA[
+					and CLASS_ID < #{class_id}
+				]]> 
+			</if>
+			and DR = 0
+		</where>
+		 order by CLASS_ID desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_CLASSROOM where DR = 0 <if test="0 != class_type">and CLASS_TYPE = #{class_type}</if>
+    </select>
+
+   <sql id="selectClassSql">
+    	SELECT 
+		    CLASS_ID,
+		    CLASS_NAME,
+		    CLASS_BRIEF,
+		    IMAGE_URL,
+		    LINK_URL,
+		    CREATE_TIME
+		FROM
+		    YB_T_CLASSROOM
+    </sql>
+
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+          
+    <!-- 中文分词器 -->
+	<bean id="ikAnalyzer5x" class="com.xinlianfeng.yibaker.provider.utils.lucene.PinyinAnalyzer" scope="singleton"/>
+		
+	<!-- 索引recipe -->
+	<bean id="recipePath" class="java.nio.file.Paths" factory-method="get">
+		<constructor-arg value="./index/recipe"/>
+		<constructor-arg value=""/>
+	</bean>
+	
+	<bean id="recipeDirectory" class="org.apache.lucene.store.FSDirectory" factory-method="open" scope="singleton">
+		<constructor-arg ref="recipePath"/>
+	</bean>
+	
+	<bean id="recipeWriterConfig" class="org.apache.lucene.index.IndexWriterConfig" scope="singleton">
+		<constructor-arg ref="ikAnalyzer5x"/>
+	</bean>
+	
+	<bean id="recipeWriter" class="org.apache.lucene.index.IndexWriter" scope="singleton">
+		<constructor-arg ref="recipeDirectory"/>
+		<constructor-arg ref="recipeWriterConfig"/>
+	</bean>
+	
+<!-- 	<bean id="recipeDirectoryReader" class="org.apache.lucene.index.DirectoryReader" lazy-init="true" factory-method="open" scope="singleton"> -->
+<!-- 		<constructor-arg ref="recipeDirectory"/> -->
+<!-- 	</bean> -->
+	
+<!-- 	<bean id="recipeSearcher" class="org.apache.lucene.search.IndexSearcher" lazy-init="true" scope="singleton"> -->
+<!-- 		<constructor-arg ref="recipeDirectoryReader"/> -->
+<!-- 	</bean> -->
+	
+	<!-- 索引recipeIngredient -->
+	<bean id="recipeIngredientPath" class="java.nio.file.Paths" factory-method="get">
+		<constructor-arg value="./index/recipeIngredient"/>
+		<constructor-arg value=""/>
+	</bean>
+	
+	<bean id="recipeIngredientDirectory" class="org.apache.lucene.store.FSDirectory" factory-method="open" scope="singleton">
+		<constructor-arg ref="recipeIngredientPath"/>
+	</bean>
+	
+	<bean id="recipeIngredientWriterConfig" class="org.apache.lucene.index.IndexWriterConfig" scope="singleton">
+		<constructor-arg ref="ikAnalyzer5x"/>
+	</bean>
+	
+	<bean id="recipeIngredientWriter" class="org.apache.lucene.index.IndexWriter" scope="singleton">
+		<constructor-arg ref="recipeIngredientDirectory"/>
+		<constructor-arg ref="recipeIngredientWriterConfig"/>
+	</bean>
+	
+<!-- 	<bean id="recipeIngredientDirectoryReader" class="org.apache.lucene.index.DirectoryReader" lazy-init="true" factory-method="open" scope="singleton"> -->
+<!-- 		<constructor-arg ref="recipeIngredientDirectory"/> -->
+<!-- 	</bean> -->
+	
+<!-- 	<bean id="recipeIngredientSearcher" class="org.apache.lucene.search.IndexSearcher" lazy-init="true" scope="prototype"> -->
+<!-- 		<constructor-arg ref="recipeIngredientDirectoryReader"/> -->
+<!-- 	</bean> -->
+
+	<!-- 索引recipe -->
+	<bean id="recipePath3" class="java.nio.file.Paths" factory-method="get">
+		<constructor-arg value="./index/recipe3"/>
+		<constructor-arg value=""/>
+	</bean>
+	
+	<bean id="recipeDirectory3" class="org.apache.lucene.store.FSDirectory" factory-method="open" scope="singleton">
+		<constructor-arg ref="recipePath3"/>
+	</bean>
+	
+	<bean id="recipeWriterConfig3" class="org.apache.lucene.index.IndexWriterConfig" scope="singleton">
+		<constructor-arg ref="ikAnalyzer5x"/>
+	</bean>
+	
+	<bean id="recipeWriter3" class="org.apache.lucene.index.IndexWriter" scope="singleton">
+		<constructor-arg ref="recipeDirectory3"/>
+		<constructor-arg ref="recipeWriterConfig3"/>
+	</bean>
+	
+	
+		<!-- 索引recipeIngredient  3-->
+	<bean id="recipeIngredientPath3" class="java.nio.file.Paths" factory-method="get">
+		<constructor-arg value="./index/recipeIngredient3"/>
+		<constructor-arg value=""/>
+	</bean>
+	
+	<bean id="recipeIngredientDirectory3" class="org.apache.lucene.store.FSDirectory" factory-method="open" scope="singleton">
+		<constructor-arg ref="recipeIngredientPath3"/>
+	</bean>
+	
+	<bean id="recipeIngredientWriterConfig3" class="org.apache.lucene.index.IndexWriterConfig" scope="singleton">
+		<constructor-arg ref="ikAnalyzer5x"/>
+	</bean>
+	
+	<bean id="recipeIngredientWriter3" class="org.apache.lucene.index.IndexWriter" scope="singleton">
+		<constructor-arg ref="recipeIngredientDirectory3"/>
+		<constructor-arg ref="recipeIngredientWriterConfig3"/>
+	</bean>
+	<!-- 搜索service bean -->
+	<bean id="searcherService" class="com.xinlianfeng.yibaker.provider.service.impl.SearcherService" lazy-init="true" factory-method="getInstance"  scope="singleton"/>
+</beans>

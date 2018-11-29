@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.FeedbackDao">
+
+	<insert id="create" parameterType="com.xinlianfeng.yibaker.common.entity.Feedback"  useGeneratedKeys="true" keyProperty="fb_id">
+		insert into
+		YB_T_FEED_BACK (
+		FB_CONTENT,
+		CONTACT_TYPE, 
+		CONTACT_CODE, 
+		YB_USER_ID, 
+		APP_VERSION, 
+		OS_TYPE, 
+		OS_VERSION, 
+		IP_ADDR, 
+		FB_TIME)
+		values (
+		#{fb_content}, 
+		#{contact_type}, 
+		#{contact_code}, 
+		#{yb_user_id}, 
+		#{app_version}, 
+		#{os_type}, 
+		#{os_version}, 
+		#{ip_addr}, 
+		#{fb_time})
+	</insert>
+
+ </mapper>

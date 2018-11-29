@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RecipeTopicDao">
+
+	<!-- 专题详情 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.RecipeTopic" id="topicResultMap">  
+	    <id property="topic_id" column="TOPIC_ID" />  
+	    <result property="yb_user_id" column="YB_USER_ID" />  
+	    <result property="topic_name" column="TOPIC_NAME" />  
+	    <result property="topic_content" column="TOPIC_CONTENT" />  
+	    <result property="topic_image" column="TOPIC_IMAGE" />  
+	    <result property="create_time" column="CREATE_TIME" />  
+	    <result property="recipe_count" column="RECIPE_COUNT" />
+	    <result property="reply_count" column="TOPIC_REPLY_COUNT" />
+	    <result property="like_count" column="SNS_LIKE_COUNT" />
+	    <result property="collect_count" column="SNS_COLLECT_COUNT" />  
+	</resultMap>  
+
+	<!-- 专题所有相关信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.TopicDetailResp" id="topicDetailResultMap">
+		<association property="topic" resultMap="topicResultMap"/>
+		<collection  property="recipelist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.RecipeDetailResp" resultMap="com.xinlianfeng.yibaker.provider.dao.RecipeDao.topicRecipeInfoMap"/>
+	</resultMap>
+
+	<!-- 我收藏的专题信息 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.TopicDetailResp" id="otherTopicResultMap" >
+		<association property="topic" resultMap="topicResultMap"/>
+		<association property="op_time" resultMap="com.xinlianfeng.yibaker.provider.dao.SNSTopicDao.snsTopicOpTimeResultMap"/>
+	</resultMap>
+
+	<!-- 我收藏的专题列表 -->
+	<resultMap type="com.xinlianfeng.yibaker.common.resp.TopicListResp" id="otherListMap" >
+		<collection  property="topiclist" javaType="ArrayList" ofType="com.xinlianfeng.yibaker.common.resp.TopicDetailResp" resultMap="otherTopicResultMap"/>
+	</resultMap>
+
+	<!-- 查询专题详细信息-->
+     <select id="getTopicDetail" resultMap ="topicDetailResultMap">
+    	<include refid="selectTopicDetailSql"></include>
+    	<where> t.Topic_ID = #{topic_id} and t.DR = 0</where>
+    </select>
+ 
+	<!-- 查询专题列表-->
+     <select id="getTopicList" resultType="com.xinlianfeng.yibaker.common.entity.RecipeTopic">
+     	SELECT  
+		    t.TOPIC_ID,
+		    t.YB_USER_ID,
+		    t.TOPIC_NAME,
+		    t.TOPIC_CONTENT,
+		    t.TOPIC_IMAGE,
+		    t.CREAT_TIME,
+		    tl.RECIPE_COUNT,
+		    r.REPLY_COUNT,
+			ss.LIKE_COUNT,
+			ss.COLLECT_COUNT 
+		FROM
+		    YB_T_RECIPE_TOPIC t
+		    	LEFT JOIN
+		    (SELECT TOPIC_ID, IFNULL(COUNT(*), 0) RECIPE_COUNT FROM YB_T_TOPIC_LINK WHERE IS_LINK = 1 and RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0  and RECIPE_STATUS = 1) GROUP BY TOPIC_ID) tl ON t.TOPIC_ID = tl.TOPIC_ID 
+		        LEFT JOIN
+		    (select TOPIC_ID, ifnull(count(*), 0) REPLY_COUNT from YB_T_TOPIC_REPLY where DR = 0 group by TOPIC_ID)  r on t.TOPIC_ID = r.TOPIC_ID   
+				LEFT JOIN
+			(select TOPIC_ID, sum(IS_LIKE) LIKE_COUNT, sum(IS_COLLECT) COLLECT_COUNT from YB_T_SNS_TOPIC group by TOPIC_ID) ss on t.TOPIC_ID = ss.TOPIC_ID 
+		<where>
+			t.DR = 0
+			<if test="0 != topic_id">
+				<![CDATA[
+					and t.TOPIC_ID < #{topic_id}
+				]]> 
+			</if>
+		</where>
+		ORDER BY t.TOPIC_ID DESC LIMIT #{limit}
+    </select>
+ 
+ 	<!-- 查询专题总数-->
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_RECIPE_TOPIC where  DR = 0 
+    </select>
+
+  	<!-- 查询我收藏的专题列表-->
+    <select id="getMyCollectList" resultMap ="otherListMap">
+        <include refid="selectOtherListSql"></include>
+		<where>
+			ts.YB_USER_ID=#{yb_user_id}
+			and ts.IS_COLLECT = 1 
+			and t.DR = 0 
+			<if test="0 != collect_time">
+				<![CDATA[
+					and ts.COLLECT_TIME < #{collect_time}
+				]]> 
+			</if>
+		</where>
+		 order by ts.COLLECT_TIME desc limit #{limit}
+    </select>
+
+ 	<!-- 查询我收藏的专题总数-->
+    <select id="getMyCollectTotal" resultType="int">
+   	 	select count(*) from YB_T_SNS_TOPIC ts
+		LEFT JOIN
+			YB_T_RECIPE_TOPIC t on ts.TOPIC_ID = t.TOPIC_ID
+		where 
+			ts.YB_USER_ID = #{yb_user_id} 
+			and ts.IS_COLLECT = 1
+			and t.DR = 0 
+    </select>
+
+	<!-- 查询专题所有相关信息sql -->
+   <sql id="selectTopicDetailSql">
+    	SELECT 
+		    t.TOPIC_ID,
+<!-- 		    t.YB_USER_ID, -->
+		    t.TOPIC_NAME,
+		    t.TOPIC_CONTENT,
+		    t.TOPIC_IMAGE,
+		    t.CREAT_TIME,
+		    rc.RECIPE_COUNT,
+		    r.RECIPE_ID,
+		    r.RECIPE_NAME,
+		    r.RECIPE_TYPE,
+		    r.KEYWORD,
+		    r.RECIPE_BRIEF,
+		    r.RECIPE_CONTENT,
+		    r.RECIPE_IMAGE,
+		    r.RECIPE_VIDEO,
+		    r.YB_USER_ID,
+		    r.CREATE_TIME,
+		    r.UPDATE_TIME,
+		    r.RECIPE_PRICE,
+		    r.DEGREE,
+		    r.TIME_RANGE,
+		    r.RECIPE_STATUS,
+		    r.E_MALL_URL,
+		    tl.DESCRIPTION,
+		    rop.COLLECT_COUNT,
+		    rop.LIKE_COUNT,
+		    rop.DOWNLOAD_COUNT,
+		    wop.DO_COUNT,
+		    sop.SHARE_COUNT,
+		    ui.YB_USER_ID,
+		    ui.NICKNAME,
+		    ui.PHOTO,
+		    ui.LEVEL_ID,
+		    tr.TOPIC_REPLY_COUNT,
+			ss.SNS_LIKE_COUNT,
+			ss.SNS_COLLECT_COUNT
+		FROM
+		    YB_T_TOPIC_LINK tl
+				LEFT JOIN
+		    YB_T_RECIPE_TOPIC t on tl.TOPIC_ID = t.TOPIC_ID
+		    	LEFT JOIN
+		    (SELECT TOPIC_ID, IFNULL(COUNT(*), 0) RECIPE_COUNT FROM YB_T_TOPIC_LINK WHERE IS_LINK = 1 and RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0 and RECIPE_STATUS = 1) GROUP BY TOPIC_ID) rc ON t.TOPIC_ID = rc.TOPIC_ID
+				RIGHT JOIN
+			(SELECT * FROM YB_T_RECIPE WHERE DR = 0 AND RECIPE_STATUS = 1) r on tl.RECIPE_ID = r.RECIPE_ID
+		        LEFT JOIN
+			(select RECIPE_ID, ifnull(sum(IS_COLLECT), 0) COLLECT_COUNT,sum(IS_LIKE) LIKE_COUNT,sum(IS_DOWNLOAD) DOWNLOAD_COUNT from YB_T_SNS_RECIPE group by RECIPE_ID) rop on r.RECIPE_ID = rop.RECIPE_ID
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) DO_COUNT from YB_T_RECIPE_WORK where DR = 0 group by RECIPE_ID)  wop on r.RECIPE_ID = wop.RECIPE_ID   
+		        LEFT JOIN
+		    (select RECIPE_ID, ifnull(count(*), 0) SHARE_COUNT from YB_T_SNS_RECIPE_SHARE_LOG group by RECIPE_ID)  sop on r.RECIPE_ID = sop.RECIPE_ID   
+				LEFT JOIN
+			YB_T_USER_INFO ui on r.YB_USER_ID = ui.YB_USER_ID 
+			    LEFT JOIN
+		    (select TOPIC_ID, ifnull(count(*), 0) TOPIC_REPLY_COUNT from YB_T_TOPIC_REPLY where DR = 0 group by TOPIC_ID)  tr on t.TOPIC_ID = tr.TOPIC_ID   
+				LEFT JOIN
+			(select TOPIC_ID, sum(IS_LIKE) SNS_LIKE_COUNT, sum(IS_COLLECT) SNS_COLLECT_COUNT from YB_T_SNS_TOPIC group by TOPIC_ID) ss on t.TOPIC_ID = ss.TOPIC_ID 
+    </sql>
+
+	<!-- 查询我收藏的专题sql -->
+    <sql id="selectOtherListSql">
+     	SELECT  
+		    t.TOPIC_ID,
+		    t.YB_USER_ID,
+		    t.TOPIC_NAME,
+		    t.TOPIC_CONTENT,
+		    t.TOPIC_IMAGE,
+		    t.CREAT_TIME,
+		    tl.RECIPE_COUNT,
+		    ts.COLLECT_TIME,
+		    tl.RECIPE_COUNT
+		FROM
+		    YB_T_SNS_TOPIC ts
+				LEFT JOIN
+			YB_T_RECIPE_TOPIC t on ts.TOPIC_ID = t.TOPIC_ID
+		    	LEFT JOIN
+		    (SELECT TOPIC_ID, IFNULL(COUNT(*), 0) RECIPE_COUNT FROM YB_T_TOPIC_LINK WHERE IS_LINK = 1 and RECIPE_ID in (select RECIPE_ID from YB_T_RECIPE where DR = 0 and RECIPE_STATUS = 1) GROUP BY TOPIC_ID) tl ON t.TOPIC_ID = tl.TOPIC_ID
+    </sql>
+
+</mapper>

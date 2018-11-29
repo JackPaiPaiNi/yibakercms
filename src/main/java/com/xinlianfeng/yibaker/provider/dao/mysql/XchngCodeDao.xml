@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.XchngCodeDao">
+
+   <insert id="createXchngCode" parameterType="com.xinlianfeng.yibaker.common.entity.XchngCode" useGeneratedKeys="true" keyProperty="xchng_no">
+   	insert into YB_T_XCHNG_CODE (XCHNG_CODE, XCHNG_IDX, XCHNG_RND, XCHNG_TYPE, XCHNG_CNT, XCHNG_PWD, XCHNG_STATUS, XCHNG_CTIME, XCHNG_ETIME, NOTE ) 
+   	 values (#{xchng_code}, #{xchng_idx}, #{xchng_rnd}, #{xchng_type}, #{xchng_cnt}, #{xchng_pwd}, #{xchng_status}, #{xchng_ctime}, #{xchng_etime}, #{note} )
+   </insert> 
+   
+   <select id="findXchngCode"  parameterType="com.xinlianfeng.yibaker.common.entity.XchngCode" resultType="com.xinlianfeng.yibaker.common.entity.XchngCode">
+   	select XCHNG_CID, XCHNG_CODE, XCHNG_IDX, XCHNG_RND, XCHNG_TYPE, XCHNG_CNT, XCHNG_PWD, XCHNG_STATUS, XCHNG_CTIME, XCHNG_ETIME, XCHNG_VCODE, NOTE
+   		from YB_T_XCHNG_CODE 
+   		where XCHNG_IDX = #{xchng_idx} and XCHNG_RND = #{xchng_rnd}
+   </select>
+   
+   <select id="findOneByVcode"  parameterType="com.xinlianfeng.yibaker.common.entity.XchngCode" resultType="com.xinlianfeng.yibaker.common.entity.XchngCode">
+   	select XCHNG_CID,XCHNG_CODE, XCHNG_IDX, XCHNG_RND, XCHNG_TYPE, XCHNG_CNT, XCHNG_PWD, XCHNG_STATUS, XCHNG_CTIME, XCHNG_ETIME, XCHNG_VCODE, NOTE
+   		from YB_T_XCHNG_CODE 
+   		where XCHNG_CID = #{xchng_cid} and XCHNG_VCODE = #{xchng_vcode}
+   </select>
+   
+   <update id="updateXchngCodeStatus" parameterType="com.xinlianfeng.yibaker.common.entity.XchngCode">
+   	update YB_T_XCHNG_CODE set XCHNG_STATUS = #{xchng_status} where XCHNG_CID = #{xchng_cid}
+   </update>
+   
+   <update id="updateXchngCodeVcode" parameterType="com.xinlianfeng.yibaker.common.entity.XchngCode">
+   	update YB_T_XCHNG_CODE set XCHNG_VCODE = #{xchng_vcode} where XCHNG_CID = #{xchng_cid}
+   </update>
+   
+</mapper>

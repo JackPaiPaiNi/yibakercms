@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.AlipayOrderDao">
+
+   <insert id="createAlipayOrder" parameterType="com.xinlianfeng.yibaker.common.entity.AlipayOrder" useGeneratedKeys="true" keyProperty="alpy_oid">
+   	insert into YB_T_ALIPAY_ORDER (SERVICE, PARTNER, _INPUT_CHARSET, SIGN_TYPE, SIGN, NOTIFY_URL, APP_ID, APPENV, OUT_TRADE_NO, SUBJECT, PAYMENT_TYPE, SELLER_ID, TOTAL_FEE, BODY, GOODS_TYPE, RN_CHECK, IT_B_PAY, EXTERN_TOKEN, OUT_CONTEXT, NOTE ) 
+   	 values (#{service}, #{partner}, #{_input_charset}, #{sign_type}, #{sign}, #{notify_url}, #{app_id}, #{appenv}, #{out_trade_no}, #{subject}, #{payment_type}, #{seller_id}, #{total_fee}, #{body}, #{goods_type}, #{rn_check}, #{it_b_pay}, #{extern_token}, #{out_context}, #{note} )
+   </insert> 
+   
+   <update id="updateAlipayOrderSign"  parameterType="com.xinlianfeng.yibaker.common.entity.AlipayOrder">
+   	 update YB_T_ALIPAY_ORDER set SIGN = #{sign} where ALPY_OID = #{alpy_oid}
+   </update>
+   
+   <select id="findOneByOrderno" resultType="com.xinlianfeng.yibaker.common.entity.AlipayOrder">
+   	select ALPY_OID, SERVICE, PARTNER, _INPUT_CHARSET, SIGN_TYPE, SIGN, NOTIFY_URL, APP_ID, APPENV, OUT_TRADE_NO, SUBJECT, PAYMENT_TYPE, SELLER_ID, TOTAL_FEE, BODY, GOODS_TYPE, RN_CHECK, IT_B_PAY, EXTERN_TOKEN, OUT_CONTEXT, NOTE
+   	    from YB_T_ALIPAY_ORDER 
+   	    where OUT_TRADE_NO = #{out_trade_no}
+   </select>
+   
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.WxpayResultDao">
+
+   <insert id="createWxpayResult" parameterType="com.xinlianfeng.yibaker.common.entity.WxpayResult" useGeneratedKeys="true" keyProperty="wxpy_rid">
+   	insert into YB_T_WXPAY_RESULT (WXPY_OID, APPID, MCH_ID, DEVICE_INFO, NONCE_STR, SIGN, RESULT_CODE, ERR_CODE, ERR_CODE_DES, OPENID, IS_SUBSCRIBE, TRADE_TYPE, BANK_TYPE, TOTAL_FEE, FEE_TYPE, CASH_FEE, CASH_FEE_TYPE, COUPON_FEE, COUPON_COUNT, COUPON_BATCH_ID_$N, COUPON_ID_$N, COUPON_FEE_$N, TRANSACTION_ID, OUT_TRADE_NO, ATTACH, TIME_END, TRADE_STATE, TRADE_STATE_DESC, NOTE 
+)  values 
+		(#{wxpy_oid}, #{appid}, #{mch_id}, #{device_info}, #{nonce_str}, #{sign}, #{result_code}, #{err_code}, #{err_code_des}, #{openid}, #{is_subscribe}, #{trade_type}, #{bank_type}, #{total_fee}, #{fee_type}, #{cash_fee}, #{cash_fee_type}, #{coupon_fee}, #{coupon_count}, #{coupon_batch_id_$n}, #{coupon_id_$n}, #{coupon_fee_$n}, #{transaction_id}, #{out_trade_no}, #{attach}, #{time_end}, #{trade_state}, #{trade_state_desc}, #{note} 
+)
+   </insert> 
+   
+   <select id="findWxpayResult" resultType="com.xinlianfeng.yibaker.common.entity.WxpayResult">
+   	 select WXPY_RID, WXPY_OID, APPID, MCH_ID, DEVICE_INFO, NONCE_STR, SIGN, RESULT_CODE, ERR_CODE, ERR_CODE_DES, OPENID, IS_SUBSCRIBE, TRADE_TYPE, BANK_TYPE, TOTAL_FEE, FEE_TYPE, CASH_FEE, CASH_FEE_TYPE, COUPON_FEE, COUPON_COUNT, COUPON_BATCH_ID_$N, COUPON_ID_$N, COUPON_FEE_$N, TRANSACTION_ID, OUT_TRADE_NO, ATTACH, TIME_END, TRADE_STATE, TRADE_STATE_DESC, NOTE
+   	 	from YB_T_WXPAY_RESULT
+   	 	where OUT_TRADE_NO = #{out_trade_no}
+   </select>
+   
+   <select id="findWxpayResultByOid" resultType="com.xinlianfeng.yibaker.common.entity.WxpayResult">
+   	 select WXPY_RID, WXPY_OID, APPID, MCH_ID, DEVICE_INFO, NONCE_STR, SIGN, RESULT_CODE, ERR_CODE, ERR_CODE_DES, OPENID, IS_SUBSCRIBE, TRADE_TYPE, BANK_TYPE, TOTAL_FEE, FEE_TYPE, CASH_FEE, CASH_FEE_TYPE, COUPON_FEE, COUPON_COUNT, COUPON_BATCH_ID_$N, COUPON_ID_$N, COUPON_FEE_$N, TRANSACTION_ID, OUT_TRADE_NO, ATTACH, TIME_END, TRADE_STATE, TRADE_STATE_DESC, NOTE
+   	 	from YB_T_WXPAY_RESULT
+   	 	where WXPY_OID = #{wxpy_oid}
+   </select>
+   
+   <select id="findWxpayTradeStateByOid" resultType="com.xinlianfeng.yibaker.common.entity.WxpayResult">
+   	 select  APPID, MCH_ID, TRANSACTION_ID, OUT_TRADE_NO,  TRADE_STATE, TRADE_STATE_DESC
+   	 	from YB_T_WXPAY_RESULT
+   	 	where WXPY_OID = #{wxpy_oid}
+   </select>
+   
+   <update id="updateWxpayTradeStateByOrderno" parameterType="com.xinlianfeng.yibaker.common.entity.WxpayResult">
+   	 	update YB_T_WXPAY_RESULT 
+   	 		set TRADE_STATE = #{trade_state}, TRADE_STATE_DESC = #{trade_state_desc}, TIME_END = #{time_end},NONCE_STR=#{nonce_str}, SIGN=#{sign}
+   	 		, RESULT_CODE=#{result_code}, ERR_CODE=#{err_code}, ERR_CODE_DES=#{err_code_des}, OPENID=#{openid}, IS_SUBSCRIBE=#{is_subscribe}
+   	 		, TRADE_TYPE=#{trade_type}, BANK_TYPE=#{bank_type}, TOTAL_FEE=#{total_fee}, FEE_TYPE=#{fee_type}, CASH_FEE=#{cash_fee}
+   	 		, CASH_FEE_TYPE=#{cash_fee_type}, COUPON_FEE=#{coupon_fee}, COUPON_COUNT=#{coupon_count}, COUPON_BATCH_ID_$N=#{coupon_batch_id_$n}
+   	 		, COUPON_ID_$N=#{coupon_id_$n}, COUPON_FEE_$N=#{coupon_fee_$n}, TRANSACTION_ID=#{transaction_id},  ATTACH=#{attach}
+   	 		where OUT_TRADE_NO=#{out_trade_no}
+   </update>
+   
+   <select id="findNonfinalWxpayResults" resultType="com.xinlianfeng.yibaker.common.entity.WxpayResult">
+   	 select  WXPY_RID, WXPY_OID, APPID, MCH_ID, TRANSACTION_ID, OUT_TRADE_NO,  TRADE_STATE, TRADE_STATE_DESC
+   	 	from YB_T_WXPAY_RESULT
+   	 	where OUT_TRADE_NO in (select CHARGE_ORDERNO from YB_T_RECHARGE_RECORD where CHARGE_STATUS = 1) 
+   </select>
+</mapper>

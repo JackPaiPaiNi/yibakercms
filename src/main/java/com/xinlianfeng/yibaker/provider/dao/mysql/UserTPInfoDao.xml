@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.UserTPInfoDao">
+
+    <insert id="createTPUser" parameterType="com.xinlianfeng.yibaker.common.entity.UserTPInfo">
+    	insert into 
+    	YB_T_USER_TPINFO (YB_USER_ID, TYPE, OPEN_ID, TP_TOKEN, STATUS, LINK_TIME) 
+    	values (#{yb_user_id}, #{type}, #{open_id}, #{tp_token}, #{status}, #{link_time})
+    </insert>
+    
+    <select id="isExist" parameterType="com.xinlianfeng.yibaker.common.entity.UserTPInfo" resultType="long">
+        select YB_USER_ID from YB_T_USER_TPINFO where OPEN_ID = #{open_id} and TYPE = #{type} 
+   </select>
+
+    <select id="findByUser" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.UserTPInfo">
+      <include refid="selectUserTPInfoSql"></include>
+		<where>
+			YB_USER_ID=#{yb_user_id} and STATUS = 1 
+		</where>
+   </select>
+
+   <sql id="selectUserTPInfoSql">
+    	SELECT 
+    		YB_USER_ID,
+		    TYPE,
+		    OPEN_ID,
+		    TP_TOKEN,
+		    STATUS,
+		    LINK_TIME
+		FROM
+		    YB_T_USER_TPINFO
+    </sql>
+
+</mapper>

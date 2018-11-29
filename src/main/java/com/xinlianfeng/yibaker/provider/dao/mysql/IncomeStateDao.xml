@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.IncomeStateDao">
+
+   <insert id="createIncomeState" parameterType="com.xinlianfeng.yibaker.common.entity.IncomeState" useGeneratedKeys="true" keyProperty="inst_id">
+   	insert into YB_T_INCOME_STATE (INST_ACCOUNT_ID, INST_TYPE, INST_REASON, INST_REASON_SRCID, INST_PRE_BALANCE, INST_DELTA, INST_POST_BALANCE, INST_TIME) values 
+		(#{inst_account_id}, #{inst_type}, #{inst_reason}, #{inst_reason_srcid}, #{inst_pre_balance}, #{inst_delta}, #{inst_post_balance}, #{inst_time})
+   </insert> 
+
+	<select id="findIncomeStates" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+		select inst.INST_ACCOUNT_ID, inst.INST_TYPE, inst.INST_REASON, inst.INST_REASON_SRCID, inst.INST_DELTA,  inst.INST_TIME,
+		case inst.INST_REASON when 1 then mpr.PERFORM_MISSION_NAME when 2 then tr.TR_SRC_NAME when 3 then tr2.TR_SRC_NAME when 4 then dv.DV_SRC_NAME end SRCNAME 
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+			left join YB_T_MISSION_PERFORM_RECORD mpr on inst.INST_REASON =1 and mpr.MPR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr on inst.INST_REASON = 2 and tr.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr2 on inst.INST_REASON = 3 and tr2.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_DEAL_VIOLATION dv on inst.INST_REASON = 4 and dv.DV_ID = inst.INST_REASON_SRCID
+			where  ba.YB_USER_ID = #{yb_user_id}
+			order by inst.INST_TIME desc
+	</select>
+	
+	<select id="findOne" parameterType="long" resultType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+		select INST_ID,INST_ACCOUNT_ID, INST_TYPE, INST_REASON, INST_REASON_SRCID, INST_DELTA,  INST_TIME 
+		 from YB_T_INCOME_STATE where INST_ID = #{inst_id}
+	</select>
+	
+	<select id="findIncomeStatesByPage"  resultType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+		select inst.INST_ID,inst.INST_ACCOUNT_ID, inst.INST_TYPE, inst.INST_REASON, inst.INST_REASON_SRCID, inst.INST_DELTA, inst.INST_TIME, inst.INST_POST_BALANCE,
+		case inst.INST_REASON when 1 then mpr.PERFORM_MISSION_NAME when 2 then  tr.TR_SRC_NAME when 3 then tr2.TR_SRC_NAME when 4 then dv.DV_SRC_NAME 
+		 when 6 then concat(format(rr.CHARGE_AMOUNT/100,2),'元充值焙壳') when 7 then if(rwd.REWARDER_USER_ID=#{yb_user_id}, concat('打赏给好友-', rwd.REWARDEE_USER_NAME), concat('好友打赏-', rwd.REWARDER_USER_NAME) ) when 8 then concat('兑换码兑换-', xchg.XCHNG_CODE) end SRCNAME, 
+		case inst.INST_REASON when 1 then '' when 2 then '' when 3 then '' when 4 then ''  
+		 when 6 then rr.CHARGE_ORDERNO when 7 then rwd.REWARD_ORDERNO when 8 then xchg.XCHNG_ORDERNO end ORDERNO 
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+			left join YB_T_MISSION_PERFORM_RECORD mpr on inst.INST_REASON =1 and mpr.MPR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr on inst.INST_REASON = 2 and tr.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr2 on inst.INST_REASON = 3 and tr2.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_DEAL_VIOLATION dv on inst.INST_REASON = 4 and dv.DV_ID = inst.INST_REASON_SRCID
+			left join YB_T_RECHARGE_RECORD rr on inst.INST_REASON = 6 and rr.RECHARGE_ID = inst.INST_REASON_SRCID 
+			left join YB_T_REWARD_RECORD rwd on inst.INST_REASON = 7 and rwd.REWARD_NO = inst.INST_REASON_SRCID 
+			left join YB_T_CODEXCHNG_RECORD xchg on inst.INST_REASON = 8 and xchg.XCHNG_NO = inst.INST_REASON_SRCID
+		<where>
+			ba.YB_USER_ID = #{yb_user_id} and inst.INST_DELTA !=0
+			<if test="0 != last_time">
+				<![CDATA[
+					and inst.INST_TIME < #{last_time}
+				]]> 
+			</if>
+		</where>
+			order by inst.INST_TIME desc 
+			limit #{count}
+	</select>
+	
+	<select id="findIncomeStatesCnt" parameterType="long" resultType="int">
+		select count(1) cnt
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+			where  ba.YB_USER_ID = #{yb_user_id} and inst.INST_DELTA !=0
+	</select>
+	
+	<select id="findIncomeStatesCntForReason"  resultType="int">
+		select count(1) cnt
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+			where  ba.YB_USER_ID = #{yb_user_id} and inst.INST_DELTA !=0 and inst.INST_REASON = #{inst_reason}
+	</select>
+	
+	<select id="findIncomeStatesByPageForReason"  resultType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+		select inst.INST_ID,inst.INST_ACCOUNT_ID, inst.INST_TYPE, inst.INST_REASON, inst.INST_REASON_SRCID, inst.INST_DELTA, inst.INST_TIME, inst.INST_POST_BALANCE,
+		case inst.INST_REASON when 1 then mpr.PERFORM_MISSION_NAME when 2 then  tr.TR_SRC_NAME when 3 then tr2.TR_SRC_NAME when 4 then dv.DV_SRC_NAME 
+		 when 6 then concat(format(rr.CHARGE_AMOUNT/100,2),'元充值焙壳') when 7 then if(rwd.REWARDER_USER_ID=#{yb_user_id}, concat('打赏给好友-', rwd.REWARDEE_USER_NAME), concat('好友打赏-', rwd.REWARDER_USER_NAME) ) when 8 then concat('兑换码兑换-', xchg.XCHNG_CODE) end SRCNAME, 
+		case inst.INST_REASON when 1 then '' when 2 then '' when 3 then '' when 4 then ''  
+		 when 6 then rr.CHARGE_ORDERNO when 7 then rwd.REWARD_ORDERNO when 8 then xchg.XCHNG_ORDERNO end ORDERNO 
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+			left join YB_T_MISSION_PERFORM_RECORD mpr on inst.INST_REASON =1 and mpr.MPR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr on inst.INST_REASON = 2 and tr.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_TRADE_RECORD tr2 on inst.INST_REASON = 3 and tr2.TR_ID = inst.INST_REASON_SRCID
+			left join YB_T_DEAL_VIOLATION dv on inst.INST_REASON = 4 and dv.DV_ID = inst.INST_REASON_SRCID
+			left join YB_T_RECHARGE_RECORD rr on inst.INST_REASON = 6 and rr.RECHARGE_ID = inst.INST_REASON_SRCID 
+			left join YB_T_REWARD_RECORD rwd on inst.INST_REASON = 7 and rwd.REWARD_NO = inst.INST_REASON_SRCID 
+			left join YB_T_CODEXCHNG_RECORD xchg on inst.INST_REASON = 8 and xchg.XCHNG_NO = inst.INST_REASON_SRCID
+		<where>
+			ba.YB_USER_ID = #{yb_user_id} and inst.INST_DELTA !=0 
+			<if test="0 != inst_reason">
+			  and inst.INST_REASON = #{inst_reason}
+			</if>
+			
+			<if test="0 != last_time">
+				<![CDATA[
+					and inst.INST_TIME < #{last_time}
+				]]> 
+			</if>
+		</where>
+			order by inst.INST_TIME desc 
+			limit #{count}
+	</select>
+	
+	<select id="findIncomeStateDetail"  resultType="com.xinlianfeng.yibaker.common.entity.IncomeState">
+		select inst.INST_ACCOUNT_ID, inst.INST_TYPE, inst.INST_REASON, inst.INST_REASON_SRCID, inst.INST_DELTA,  inst.INST_TIME, inst.INST_POST_BALANCE,
+		<choose>
+			<when test="inst_reason == 1">'' as ORDERNO, mpr.PERFORM_MISSION_NAME as SRCNAME</when>
+			<when test="inst_reason == 2">'' as ORDERNO, tr.TR_SRC_NAME as SRCNAME</when>
+			<when test="inst_reason == 3">'' as ORDERNO, tr2.TR_SRC_NAME as SRCNAME</when>
+			<when test="inst_reason == 4">'' as ORDERNO, dv.DV_SRC_NAME as SRCNAME</when>
+			<when test="inst_reason == 6">rr.CHARGE_ORDERNO as ORDERNO, '充值焙壳' as SRCNAME</when>
+			<when test="inst_reason == 7">rwd.REWARD_ORDERNO as ORDERNO, '打赏' as SRCNAME</when>
+			<when test="inst_reason == 8">xchg.XCHNG_ORDERNO as ORDERNO, '兑换码兑换' as SRCNAME</when>
+		</choose>
+			from YB_T_INCOME_STATE inst 
+			left join YB_T_BAKER_ACCOUNT ba on inst.INST_ACCOUNT_ID = ba.BA_ID
+		<choose>
+			<when test="inst_reason == 1">left join YB_T_MISSION_PERFORM_RECORD mpr on inst.INST_REASON =1 and mpr.MPR_ID = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 2">left join YB_T_TRADE_RECORD tr on inst.INST_REASON = 2 and tr.TR_ID = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 3">left join YB_T_TRADE_RECORD tr2 on inst.INST_REASON = 3 and tr2.TR_ID = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 4">left join YB_T_DEAL_VIOLATION dv on inst.INST_REASON = 4 and dv.DV_ID = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 6">left join YB_T_RECHARGE_RECORD rr on inst.INST_REASON = 6 and rr.RECHARGE_ID = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 7">left join YB_T_REWARD_RECORD rwd on inst.INST_REASON = 7 and rwd.REWARD_NO = inst.INST_REASON_SRCID</when>
+			<when test="inst_reason == 8">left join YB_T_CODEXCHNG_RECORD xchg on inst.INST_REASON = 8 and xchg.XCHNG_NO = inst.INST_REASON_SRCID</when>
+		</choose>
+			
+		<where>
+			ba.YB_USER_ID = #{yb_user_id} and inst.INST_DELTA !=0 and inst.INST_ID = #{inst_id} and inst.INST_REASON = #{inst_reason}
+		</where>
+	</select>
+
+</mapper>

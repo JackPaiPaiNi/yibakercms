@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSMsgDao">
+
+	<!-- 创建消息 -->
+	<insert id="create" >
+		insert into
+		YB_T_SNS_MSG (
+		TO_USER_ID, 
+		MSG_INFO_ID,
+		GROUP_ID)
+		values (
+		#{to_user_id}, 
+		#{msg_info_id},
+		#{group_id})
+	</insert>
+
+	<!-- 查询未读消息总数 -->
+    <select id="getUnReadTotal" resultType="int">
+   	 	select ifnull(count(*), 0) from YB_T_SNS_MSG where TO_USER_ID = #{to_user_id} and IS_READ = 0 and DR = 0
+    </select>
+
+	<!-- 查询站内未读分类通知数 -->
+    <select id="getUnReadTotalByType" resultType="com.xinlianfeng.yibaker.common.entity.SNSMsgCount">
+   	 	SELECT 
+   	 		IFNULL(SUM(IF(GROUP_ID = 1, 1, 0 )), 0) SYSTEM_COUNT,
+   	 		IFNULL(SUM(IF(GROUP_ID = 2, 1, 0 )), 0) REPLY_COUNT,
+   	 		IFNULL(SUM(IF(GROUP_ID = 3, 1, 0 )), 0) LIKE_COUNT,
+   	 		IFNULL(SUM(IF(GROUP_ID = 4, 1, 0 )), 0) FOLLOW_COUNT,
+   	 		IFNULL(SUM(IF(GROUP_ID = 5, 1, 0 )), 0) DOWNLOAD_COLLECT_COUNT,
+   	 		IFNULL(SUM(IF(GROUP_ID = 6, 1, 0 )), 0) REWARD_COUNT
+   	 	FROM 
+   	 		YB_T_SNS_MSG m
+   	 	WHERE TO_USER_ID = #{to_user_id} AND IS_READ = 0 AND DR = 0 
+    </select>
+
+ 	<!-- 批量设置已读 -->
+    <update id="updateReadList" >
+        update 
+        	YB_T_SNS_MSG set IS_READ = 1 
+        where 
+        	TO_USER_ID = #{to_user_id} 
+        	and GROUP_ID = #{group_id}
+			<![CDATA[
+        		and MSG_INFO_ID <= #{begin_info_id} 
+        		and MSG_INFO_ID >= #{end_info_id} 
+			]]> 
+        	and IS_READ = 0
+        	and DR = 0
+    </update>
+
+ 	<!-- 单条设置已读 -->
+    <update id="updateReadSingle" >
+        update 
+        	YB_T_SNS_MSG set IS_READ = 1 
+        where 
+        	TO_USER_ID = #{to_user_id} 
+        	and MSG_INFO_ID = #{msg_info_id} 
+        	and IS_READ = 0
+        	and DR = 0
+    </update>
+
+ 	<!-- 删除站内通知 -->
+    <update id="delete" >
+        update YB_T_SNS_MSG set DR = 1 
+ 		<where>
+			TO_USER_ID = #{to_user_id}
+			and DR = 0
+			<if test="0 != group_id">
+				and GROUP_ID = #{group_id}
+			</if>
+			<if test="0 != msg_info_id">
+				and MSG_INFO_ID = #{msg_info_id}
+			</if>
+		</where>
+    </update>
+
+</mapper>

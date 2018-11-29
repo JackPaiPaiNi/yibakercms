@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.SNSTopicDao">
+
+	<resultMap type="com.xinlianfeng.yibaker.common.entity.SNSOpTime" id="snsTopicOpTimeResultMap">  
+	    <result property="collect_time" column="COLLECT_TIME" />  
+	</resultMap>  
+
+	<insert id="insertUpdateCollect" parameterType="com.xinlianfeng.yibaker.common.req.CollectTopicReq" >
+		insert into
+		YB_T_SNS_TOPIC (
+		YB_USER_ID,
+		TOPIC_ID,
+		IS_COLLECT,
+		COLLECT_TIME)
+		values (
+		#{yb_user_id}, 
+		#{topic_id},
+		#{is_collect},
+		#{collect_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_COLLECT=#{is_collect},
+		COLLECT_TIME=#{collect_time}
+	</insert>
+	
+	<insert id="insertUpdateLike" parameterType="com.xinlianfeng.yibaker.common.req.LikeTopicReq" >
+		insert into
+		YB_T_SNS_TOPIC (
+		YB_USER_ID,
+		TOPIC_ID,
+		IS_LIKE,
+		LIKE_TIME)
+		values (
+		#{yb_user_id}, 
+		#{topic_id},
+		#{is_like},
+		#{like_time}) 
+		ON DUPLICATE KEY UPDATE
+		IS_LIKE=#{is_like},
+		LIKE_TIME=#{like_time}
+	</insert>
+
+ 	<!-- 是否收藏/点赞 -->
+     <select id="getSNSMyTopic"  resultType="com.xinlianfeng.yibaker.common.entity.SNSMyTopic">
+     	select 
+     		ifnull(sum(IS_COLLECT),0) IS_COLLECT,
+     		ifnull(sum(IS_LIKE),0) IS_LIKE
+     	from YB_T_SNS_TOPIC 
+     	where  YB_USER_ID = #{yb_user_id} and TOPIC_ID = #{topic_id}
+    </select>
+
+</mapper>

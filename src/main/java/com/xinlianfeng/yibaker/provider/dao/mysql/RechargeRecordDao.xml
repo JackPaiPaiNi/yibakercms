@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.RechargeRecordDao">
+
+   <insert id="createRechargeRecord" parameterType="com.xinlianfeng.yibaker.common.entity.RechargeRecord" useGeneratedKeys="true" keyProperty="recharge_id">
+   	insert into YB_T_RECHARGE_RECORD (CHARGE_ORDERNO, USER_ID, USER_NAME, CHARGE_AMOUNT, CHARGE_BAKERS, CHARGE_STATUS, CHARGE_WAY, CHARGE_TIME, NOTE )
+   	  values ( #{charge_orderno}, #{user_id}, #{user_name}, #{charge_amount}, #{charge_bakers}, #{charge_status}, #{charge_way}, #{charge_time}, #{note} )
+   </insert> 
+   
+   <update id="updateChargeOrderno" parameterType="com.xinlianfeng.yibaker.common.entity.RechargeRecord">
+   	update YB_T_RECHARGE_RECORD set CHARGE_ORDERNO = #{charge_orderno} where RECHARGE_ID = #{recharge_id}
+   </update>
+   
+   <update id="updateRechargeRecord" parameterType="com.xinlianfeng.yibaker.common.entity.RechargeRecord">
+   	update YB_T_RECHARGE_RECORD set CHARGE_STATUS = #{charge_status} where CHARGE_ORDERNO = #{charge_orderno}
+   </update>
+   
+   <select id="findOneByOrderno" parameterType="com.xinlianfeng.yibaker.common.entity.RechargeRecord" resultType="com.xinlianfeng.yibaker.common.entity.RechargeRecord">
+   	select RECHARGE_ID, CHARGE_ORDERNO, USER_ID, USER_NAME, CHARGE_AMOUNT, CHARGE_BAKERS, CHARGE_STATUS, CHARGE_WAY, CHARGE_TIME, NOTE 
+	   	from YB_T_RECHARGE_RECORD 
+	   	where CHARGE_ORDERNO = #{charge_orderno}
+   </select>
+   
+   <select id="findChargeAmountToday" parameterType="com.xinlianfeng.yibaker.common.entity.RechargeRecord" resultType="_int" >
+   
+    select  ifnull(sum(CHARGE_AMOUNT),0) CHARGE_AMOUNT
+	   	from YB_T_RECHARGE_RECORD 
+	   	where USER_ID = #{user_id} and  CHARGE_STATUS = 2 and from_unixtime(CHARGE_TIME/1000, '%Y-%m-%d') = curdate()
+   </select>
+   
+</mapper>

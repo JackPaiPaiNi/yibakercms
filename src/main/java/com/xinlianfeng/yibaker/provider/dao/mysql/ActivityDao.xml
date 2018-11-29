@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xinlianfeng.yibaker.provider.dao.ActivityDao">
+
+    <select id="getList" resultType="com.xinlianfeng.yibaker.common.entity.Activity">
+        <include refid="selectActivitySql"></include>
+		<where>
+			<if test="0 != activity_id">
+				<![CDATA[
+					and ACTIVITY_ID < #{activity_id}
+				]]> 
+			</if>
+			and DR = 0
+		</where>
+		 order by ACTIVITY_ID desc limit #{limit}
+    </select>
+
+    <select id="getTotal" resultType="int">
+   	 	select count(*) from YB_T_ACTIVITY where DR = 0
+    </select>
+
+   <sql id="selectActivitySql">
+    	SELECT 
+		    ACTIVITY_ID,
+		    ACTIVITY_TYPE,
+		    ACTIVITY_NAME,
+		    ACTIVITY_BRIEF,
+		    IMAGE_URL,
+		    LINK_URL,
+		    CREATE_TIME
+		FROM
+		    YB_T_ACTIVITY
+    </sql>
+
+</mapper>
